@@ -14,8 +14,8 @@ class HistoryScreen extends StatefulWidget {
 }
 
 class _HistoryScreenState extends State<HistoryScreen> {
-  List<ScanRecord> _records = [];
-  List<ScanRecord> _filtered = [];
+  List<Map<String, Object?>> _records = [];
+  List<Map<String, Object?>> _filtered = [];
   bool _isLoading = true;
   bool _isExporting = false;
   final _searchCtrl = TextEditingController();
@@ -35,7 +35,7 @@ class _HistoryScreenState extends State<HistoryScreen> {
 
   Future<void> _loadRecords() async {
     setState(() => _isLoading = true);
-    final records = await DatabaseService.instance.getAllScans();
+    final records = await DatabaseService.instance.getScansCountGroup();
     if (mounted) {
       setState(() {
         _records = records;
@@ -49,9 +49,11 @@ class _HistoryScreenState extends State<HistoryScreen> {
     final q = _searchCtrl.text.toLowerCase();
     setState(() {
       _filtered = _records.where((r) {
-        return r.rawData.toLowerCase().contains(q) ||
-            (r.decryptedName?.toLowerCase().contains(q) ?? false) ||
-            (r.decryptedPhone?.toLowerCase().contains(q) ?? false);
+        final name = r["name"] as String?;
+        final phone = r["phone"] as String?;
+        final nameMatches = name?.toLowerCase().contains(q) ?? false;
+        final phoneMatches = phone?.toLowerCase().contains(q) ?? false;
+        return nameMatches || phoneMatches;
       }).toList();
     });
   }
@@ -65,8 +67,7 @@ class _HistoryScreenState extends State<HistoryScreen> {
         title: Text('Delete Record',
             style: GoogleFonts.spaceGrotesk(
                 color: Colors.white, fontWeight: FontWeight.w700)),
-        content: Text(
-            'Remove "${record.displayTitle}" from history?',
+        content: Text('Remove "${record.displayTitle}" from history?',
             style: GoogleFonts.spaceGrotesk(color: Colors.white70)),
         actions: [
           TextButton(
@@ -144,8 +145,8 @@ class _HistoryScreenState extends State<HistoryScreen> {
                     fontWeight: FontWeight.w700)),
             const SizedBox(height: 6),
             Text('${_records.length} records will be exported',
-                style:
-                    GoogleFonts.spaceGrotesk(color: Colors.white54, fontSize: 14)),
+                style: GoogleFonts.spaceGrotesk(
+                    color: Colors.white54, fontSize: 14)),
             const SizedBox(height: 24),
             _ExportOption(
               icon: Icons.table_chart_rounded,
@@ -155,7 +156,7 @@ class _HistoryScreenState extends State<HistoryScreen> {
               onTap: () async {
                 Navigator.pop(ctx);
                 setState(() => _isExporting = true);
-                await ExportService.exportToCSV(_records);
+                await ExportService.exportToCSV(context,_records);
                 if (mounted) setState(() => _isExporting = false);
               },
             ),
@@ -168,7 +169,7 @@ class _HistoryScreenState extends State<HistoryScreen> {
               onTap: () async {
                 Navigator.pop(ctx);
                 setState(() => _isExporting = true);
-                await ExportService.exportToExcel(_records);
+                await ExportService.exportToExcel(context,_records);
                 if (mounted) setState(() => _isExporting = false);
               },
             ),
@@ -179,7 +180,9 @@ class _HistoryScreenState extends State<HistoryScreen> {
     );
   }
 
-  void _showDetailSheet(ScanRecord record) {
+  void _showDetailSheet(Map<String, Object?> record) async {
+    final records = await DatabaseService.instance.getScansByNameAndPhone(
+        record["name"] as String, record["phone"] as String);
     showModalBottomSheet(
       context: context,
       backgroundColor: const Color(0xFF1A2535),
@@ -215,18 +218,12 @@ class _HistoryScreenState extends State<HistoryScreen> {
                   Container(
                     padding: const EdgeInsets.all(12),
                     decoration: BoxDecoration(
-                      color: record.isEncrypted
-                          ? const Color(0xFF7B61FF).withOpacity(0.15)
-                          : const Color(0xFF00D4AA).withOpacity(0.15),
+                      color: const Color(0xFF00D4AA).withOpacity(0.15),
                       borderRadius: BorderRadius.circular(14),
                     ),
                     child: Icon(
-                      record.isEncrypted
-                          ? Icons.lock_rounded
-                          : Icons.qr_code_rounded,
-                      color: record.isEncrypted
-                          ? const Color(0xFF7B61FF)
-                          : const Color(0xFF00D4AA),
+                      Icons.lock_rounded,
+                      color: const Color(0xFF7B61FF),
                       size: 26,
                     ),
                   ),
@@ -236,14 +233,12 @@ class _HistoryScreenState extends State<HistoryScreen> {
                       crossAxisAlignment: CrossAxisAlignment.start,
                       children: [
                         Text(
-                          record.isEncrypted
-                              ? 'Encrypted Contact'
-                              : 'QR Code',
+                          "Encrypted Contact",
                           style: GoogleFonts.spaceGrotesk(
                               color: Colors.white54, fontSize: 13),
                         ),
                         Text(
-                          record.displayTitle,
+                          record["name"] as String,
                           style: GoogleFonts.spaceGrotesk(
                               color: Colors.white,
                               fontSize: 18,
@@ -281,7 +276,7 @@ class _HistoryScreenState extends State<HistoryScreen> {
                             style: GoogleFonts.spaceGrotesk(
                                 color: Colors.white54, fontSize: 13)),
                         Text(
-                          '${record.scanCount} time${record.scanCount > 1 ? 's' : ''}',
+                          '${records.length} time${records.length > 1 ? 's' : ''}',
                           style: GoogleFonts.spaceGrotesk(
                               color: Colors.white,
                               fontSize: 22,
@@ -295,64 +290,74 @@ class _HistoryScreenState extends State<HistoryScreen> {
                 ),
               ),
               const SizedBox(height: 20),
+              _DetailRow(
+                  label: 'Name',
+                  value: record["name"] as String,
+                  icon: Icons.person_outline),
+              _DetailRow(
+                  label: 'Phone',
+                  value: record["phone"] as String,
+                  icon: Icons.phone_outlined),
+              const SizedBox(height: 24),
 
-              if (record.decryptedName != null &&
-                  record.decryptedName!.isNotEmpty)
-                _DetailRow(
-                    label: 'Name',
-                    value: record.decryptedName!,
-                    icon: Icons.person_outline),
-              if (record.decryptedPhone != null &&
-                  record.decryptedPhone!.isNotEmpty)
-                _DetailRow(
-                    label: 'Phone',
-                    value: record.decryptedPhone!,
-                    icon: Icons.phone_outlined),
-              _DetailRow(
-                  label: 'Last Scanned',
-                  value: DateFormat('dd MMM yyyy, hh:mm a')
-                      .format(record.scannedAt),
-                  icon: Icons.access_time_rounded),
-              _DetailRow(
-                  label: 'Encrypted',
-                  value: record.isEncrypted ? 'Yes (AES-256)' : 'No',
-                  icon: record.isEncrypted
-                      ? Icons.lock_rounded
-                      : Icons.lock_open_rounded),
-              const SizedBox(height: 8),
-              Text('Raw Data',
-                  style: GoogleFonts.spaceGrotesk(
-                      color: Colors.white54, fontSize: 13)),
-              const SizedBox(height: 6),
-              GestureDetector(
-                onTap: () {
-                  Clipboard.setData(ClipboardData(text: record.rawData));
-                  ScaffoldMessenger.of(context).showSnackBar(
-                    const SnackBar(
-                      content: Text('Copied to clipboard'),
-                      backgroundColor: Color(0xFF00D4AA),
-                    ),
-                  );
-                },
-                child: Container(
-                  width: double.infinity,
-                  padding: const EdgeInsets.all(14),
-                  decoration: BoxDecoration(
-                    color: const Color(0xFF0F1923),
-                    borderRadius: BorderRadius.circular(12),
-                    border: Border.all(color: Colors.white12),
-                  ),
-                  child: Text(
-                    record.rawData,
-                    style: GoogleFonts.sourceCodePro(
-                        color: Colors.white70, fontSize: 12, height: 1.5),
-                  ),
+              Text(
+                'Scan History',
+                style: GoogleFonts.spaceGrotesk(
+                  color: Colors.white,
+                  fontSize: 16,
+                  fontWeight: FontWeight.w700,
                 ),
               ),
-              const SizedBox(height: 6),
-              Text('Tap to copy',
-                  style:
-                      GoogleFonts.spaceGrotesk(color: Colors.white38, fontSize: 11)),
+              const SizedBox(height: 12),
+              Container(
+                height: 220,
+                decoration: BoxDecoration(
+                  color: Colors.white.withOpacity(0.04),
+                  borderRadius: BorderRadius.circular(16),
+                  border: Border.all(
+                    color: Colors.white10,
+                  ),
+                ),
+                child: ListView.separated(
+                  itemCount: records.length,
+                  padding: const EdgeInsets.all(12),
+                  itemBuilder: (context, index) {
+                    final scan = records[index];
+
+                    return Container(
+                      padding: const EdgeInsets.symmetric(
+                        horizontal: 14,
+                        vertical: 12,
+                      ),
+                      decoration: BoxDecoration(
+                        color: Colors.white.withOpacity(0.03),
+                        borderRadius: BorderRadius.circular(12),
+                      ),
+                      child: Row(
+                        children: [
+                          const Icon(
+                            Icons.access_time_rounded,
+                            color: Color(0xFF00D4AA),
+                            size: 18,
+                          ),
+                          const SizedBox(width: 12),
+                          Expanded(
+                            child: Text(
+                              DateFormat('dd MMM yy')
+                                .format(scan.scannedAt),
+                              style: GoogleFonts.spaceGrotesk(
+                                color: Colors.white70,
+                                fontSize: 14,
+                              ),
+                            ),
+                          ),
+                        ],
+                      ),
+                    );
+                  },
+                  separatorBuilder: (_, __) => const SizedBox(height: 10),
+                ),
+              ),
               const SizedBox(height: 24),
               SizedBox(
                 width: double.infinity,
@@ -376,9 +381,10 @@ class _HistoryScreenState extends State<HistoryScreen> {
 
   @override
   Widget build(BuildContext context) {
-    final totalScans =
-        _records.fold<int>(0, (sum, r) => sum + r.scanCount);
-
+    final totalScans = _records.fold<int>(
+      0,
+      (sum, r) => sum + ((r["scanCount"] as num?)?.toInt() ?? 0),
+    );
     return Scaffold(
       backgroundColor: const Color(0xFF0A1118),
       body: Column(
@@ -403,14 +409,6 @@ class _HistoryScreenState extends State<HistoryScreen> {
                       value: '$totalScans',
                       color: const Color(0xFF7B61FF),
                       icon: Icons.bar_chart_rounded,
-                    ),
-                    const SizedBox(width: 10),
-                    _StatChip(
-                      label: 'Encrypted',
-                      value:
-                          '${_records.where((r) => r.isEncrypted).length}',
-                      color: const Color(0xFFFFB347),
-                      icon: Icons.lock_rounded,
                     ),
                   ],
                 ),
@@ -459,8 +457,7 @@ class _HistoryScreenState extends State<HistoryScreen> {
           Expanded(
             child: _isLoading
                 ? const Center(
-                    child:
-                        CircularProgressIndicator(color: Color(0xFF00D4AA)))
+                    child: CircularProgressIndicator(color: Color(0xFF00D4AA)))
                 : _filtered.isEmpty
                     ? _buildEmpty()
                     : RefreshIndicator(
@@ -470,11 +467,10 @@ class _HistoryScreenState extends State<HistoryScreen> {
                         child: ListView.builder(
                           padding: const EdgeInsets.fromLTRB(16, 4, 16, 24),
                           itemCount: _filtered.length,
-                          itemBuilder: (ctx, i) =>
-                              _ScanTile(
+                          itemBuilder: (ctx, i) => _ScanTile(
                             record: _filtered[i],
                             onTap: () => _showDetailSheet(_filtered[i]),
-                            onDelete: () => _deleteRecord(_filtered[i]),
+                            // onDelete: () => _deleteRecord(_filtered[i]),
                           ),
                         ),
                       ),
@@ -488,8 +484,8 @@ class _HistoryScreenState extends State<HistoryScreen> {
               decoration: BoxDecoration(
                 color: const Color(0xFF1A2535),
                 borderRadius: BorderRadius.circular(30),
-                border: Border.all(
-                    color: const Color(0xFF00D4AA).withOpacity(0.4)),
+                border:
+                    Border.all(color: const Color(0xFF00D4AA).withOpacity(0.4)),
               ),
               child: Row(
                 mainAxisSize: MainAxisSize.min,
@@ -627,118 +623,83 @@ class _ActionIconBtn extends StatelessWidget {
 }
 
 class _ScanTile extends StatelessWidget {
-  final ScanRecord record;
+  final Map<String, Object?> record;
   final VoidCallback onTap;
-  final VoidCallback onDelete;
-  const _ScanTile(
-      {required this.record, required this.onTap, required this.onDelete});
+  final VoidCallback? onDelete;
+  const _ScanTile({required this.record, required this.onTap, this.onDelete});
 
   @override
   Widget build(BuildContext context) {
-    return Dismissible(
-      key: Key('scan_${record.id}'),
-      direction: DismissDirection.endToStart,
-      background: Container(
+    return GestureDetector(
+      onTap: onTap,
+      child: Container(
         margin: const EdgeInsets.only(bottom: 10),
+        padding: const EdgeInsets.all(16),
         decoration: BoxDecoration(
-          color: Colors.redAccent.withOpacity(0.15),
+          color: const Color(0xFF1A2535),
           borderRadius: BorderRadius.circular(16),
-          border: Border.all(color: Colors.redAccent.withOpacity(0.3)),
+          border: Border.all(color: Colors.white.withOpacity(0.07)),
         ),
-        alignment: Alignment.centerRight,
-        padding: const EdgeInsets.only(right: 20),
-        child: const Icon(Icons.delete_rounded, color: Colors.redAccent),
-      ),
-      confirmDismiss: (_) async {
-        onDelete();
-        return false;
-      },
-      child: GestureDetector(
-        onTap: onTap,
-        child: Container(
-          margin: const EdgeInsets.only(bottom: 10),
-          padding: const EdgeInsets.all(16),
-          decoration: BoxDecoration(
-            color: const Color(0xFF1A2535),
-            borderRadius: BorderRadius.circular(16),
-            border:
-                Border.all(color: Colors.white.withOpacity(0.07)),
-          ),
-          child: Row(
-            children: [
-              Container(
-                width: 44,
-                height: 44,
-                decoration: BoxDecoration(
-                  color: record.isEncrypted
-                      ? const Color(0xFF7B61FF).withOpacity(0.12)
-                      : const Color(0xFF00D4AA).withOpacity(0.12),
-                  borderRadius: BorderRadius.circular(12),
-                ),
-                child: Icon(
-                  record.isEncrypted
-                      ? Icons.lock_rounded
-                      : Icons.qr_code_rounded,
-                  color: record.isEncrypted
-                      ? const Color(0xFF7B61FF)
-                      : const Color(0xFF00D4AA),
-                  size: 20,
-                ),
+        child: Row(
+          children: [
+            Container(
+              width: 44,
+              height: 44,
+              decoration: BoxDecoration(
+                color: Color(0xFF00D4AA).withOpacity(0.12),
+                borderRadius: BorderRadius.circular(12),
               ),
-              const SizedBox(width: 14),
-              Expanded(
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    Text(
-                      record.displayTitle,
-                      style: GoogleFonts.spaceGrotesk(
-                          color: Colors.white,
-                          fontWeight: FontWeight.w600,
-                          fontSize: 15),
-                      overflow: TextOverflow.ellipsis,
-                    ),
-                    const SizedBox(height: 3),
-                    Text(
-                      record.decryptedPhone ??
-                          DateFormat('dd MMM yyyy, hh:mm a')
-                              .format(record.scannedAt),
-                      style: GoogleFonts.spaceGrotesk(
-                          color: Colors.white54, fontSize: 12),
-                      overflow: TextOverflow.ellipsis,
-                    ),
-                  ],
-                ),
+              child: Icon(
+                Icons.qr_code_rounded,
+                color: const Color.fromARGB(255, 255, 255, 255),
+                size: 20,
               ),
-              const SizedBox(width: 10),
-              Column(
-                crossAxisAlignment: CrossAxisAlignment.end,
+            ),
+            const SizedBox(width: 14),
+            Expanded(
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
-                  Container(
-                    padding: const EdgeInsets.symmetric(
-                        horizontal: 10, vertical: 4),
-                    decoration: BoxDecoration(
-                      color: const Color(0xFF00D4AA).withOpacity(0.12),
-                      borderRadius: BorderRadius.circular(20),
-                    ),
-                    child: Text(
-                      '×${record.scanCount}',
-                      style: GoogleFonts.spaceGrotesk(
-                          color: const Color(0xFF00D4AA),
-                          fontWeight: FontWeight.w800,
-                          fontSize: 13),
-                    ),
-                  ),
-                  const SizedBox(height: 4),
                   Text(
-                    DateFormat('dd MMM').format(record.scannedAt),
+                    record["name"] as String,
                     style: GoogleFonts.spaceGrotesk(
-                        color: Colors.white38, fontSize: 11),
+                        color: Colors.white,
+                        fontWeight: FontWeight.w600,
+                        fontSize: 15),
+                    overflow: TextOverflow.ellipsis,
+                  ),
+                  const SizedBox(height: 3),
+                  Text(
+                    record["phone"] as String,
+                    style: GoogleFonts.spaceGrotesk(
+                        color: Colors.white54, fontSize: 12),
+                    overflow: TextOverflow.ellipsis,
                   ),
                 ],
               ),
-            ],
-          ),
+            ),
+            const SizedBox(width: 10),
+            Column(
+              crossAxisAlignment: CrossAxisAlignment.end,
+              children: [
+                Container(
+                  padding:
+                      const EdgeInsets.symmetric(horizontal: 10, vertical: 4),
+                  decoration: BoxDecoration(
+                    color: const Color(0xFF00D4AA).withOpacity(0.12),
+                    borderRadius: BorderRadius.circular(20),
+                  ),
+                  child: Text(
+                    '×${record["scanCount"]}',
+                    style: GoogleFonts.spaceGrotesk(
+                        color: const Color(0xFF00D4AA),
+                        fontWeight: FontWeight.w800,
+                        fontSize: 13),
+                  ),
+                ),
+              ],
+            ),
+          ],
         ),
       ),
     );
@@ -795,8 +756,7 @@ class _ExportOption extends StatelessWidget {
                 ],
               ),
             ),
-            Icon(Icons.arrow_forward_ios_rounded,
-                color: color, size: 16),
+            Icon(Icons.arrow_forward_ios_rounded, color: color, size: 16),
           ],
         ),
       ),

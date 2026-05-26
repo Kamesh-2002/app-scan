@@ -207,7 +207,7 @@ class _GenerateScreenState extends State<GenerateScreen>
                                 fontSize: 18,
                                 fontWeight: FontWeight.w700)),
                         Text(
-                            'Contact data is encrypted with AES-256 before encoding',
+                            'Contact data is encrypted before encoding',
                             style: GoogleFonts.spaceGrotesk(
                                 color: Colors.white54, fontSize: 12,height: 1.4)),
                       ],
@@ -254,7 +254,7 @@ class _GenerateScreenState extends State<GenerateScreen>
                     style: const TextStyle(color: Colors.white),
                     keyboardType: TextInputType.phone,
                     decoration: const InputDecoration(
-                      hintText: 'e.g. +91 98765 43210',
+                      hintText: 'e.g. 98765 43210',
                       prefixIcon: Icon(Icons.phone_outlined,
                           color: Color(0xFF7B61FF)),
                     ),
@@ -289,7 +289,7 @@ class _GenerateScreenState extends State<GenerateScreen>
                         const SizedBox(width: 10),
                         Expanded(
                           child: Text(
-                            'QR data is AES-256 encrypted. Only App Scan can decode it.',
+                            'QR data is encrypted. Only App can decode it.',
                             style: GoogleFonts.spaceGrotesk(
                                 color: Colors.white60, fontSize: 12, height: 1.4),
                           ),
@@ -469,7 +469,7 @@ class _QRResultCard extends StatelessWidget {
                         color: Color(0xFF0A1118),
                       ),
                       embeddedImage:
-                          const AssetImage('assets/logo_placeholder.png'),
+                          const AssetImage('assets/app_logo.jpg'),
                       embeddedImageStyle: const QrEmbeddedImageStyle(
                         size: Size(36, 36),
                       ),

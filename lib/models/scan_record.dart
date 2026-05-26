@@ -5,7 +5,7 @@ class ScanRecord {
   final String? decryptedPhone;
   final bool isEncrypted;
   final DateTime scannedAt;
-  int scanCount;
+  final int? numScanCount;
 
   ScanRecord({
     this.id,
@@ -14,7 +14,7 @@ class ScanRecord {
     this.decryptedPhone,
     required this.isEncrypted,
     required this.scannedAt,
-    this.scanCount = 1,
+    this.numScanCount,
   });
 
   Map<String, dynamic> toMap() {
@@ -25,7 +25,6 @@ class ScanRecord {
       'decryptedPhone': decryptedPhone,
       'isEncrypted': isEncrypted ? 1 : 0,
       'scannedAt': scannedAt.toIso8601String(),
-      'scanCount': scanCount,
     };
   }
 
@@ -37,7 +36,6 @@ class ScanRecord {
       decryptedPhone: map['decryptedPhone'],
       isEncrypted: map['isEncrypted'] == 1,
       scannedAt: DateTime.parse(map['scannedAt']),
-      scanCount: map['scanCount'] ?? 1,
     );
   }
 

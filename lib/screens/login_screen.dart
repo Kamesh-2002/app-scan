@@ -113,24 +113,18 @@ class _LoginScreenState extends State<LoginScreen>
                           width: 88,
                           height: 88,
                           decoration: BoxDecoration(
-                            gradient: const LinearGradient(
-                              colors: [Color(0xFF00D4AA), Color(0xFF7B61FF)],
-                              begin: Alignment.topLeft,
-                              end: Alignment.bottomRight,
-                            ),
                             borderRadius: BorderRadius.circular(24),
                             boxShadow: [
                               BoxShadow(
-                                color: const Color(0xFF00D4AA).withOpacity(0.4),
-                                blurRadius: 30,
-                                spreadRadius: 0,
-                              )
+                                color: Colors.black.withOpacity(0.15),
+                                blurRadius: 20,
+                              ),
                             ],
                           ),
-                          child: const Icon(
-                            Icons.qr_code_scanner_rounded,
-                            color: Colors.white,
-                            size: 44,
+                          clipBehavior: Clip.antiAlias,
+                          child: Image.asset(
+                            'assets/app_logo.jpg',
+                            fit: BoxFit.cover,
                           ),
                         ),
                         const SizedBox(height: 28),
@@ -200,8 +194,9 @@ class _LoginScreenState extends State<LoginScreen>
                                   prefixIcon: Icon(Icons.person_outline,
                                       color: Color(0xFF00D4AA)),
                                 ),
-                                validator: (v) =>
-                                    v == null || v.isEmpty ? 'Enter username' : null,
+                                validator: (v) => v == null || v.isEmpty
+                                    ? 'Enter username'
+                                    : null,
                                 textInputAction: TextInputAction.next,
                               ),
                               const SizedBox(height: 16),
@@ -220,12 +215,13 @@ class _LoginScreenState extends State<LoginScreen>
                                           : Icons.visibility_outlined,
                                       color: Colors.white54,
                                     ),
-                                    onPressed: () => setState(
-                                        () => _obscurePassword = !_obscurePassword),
+                                    onPressed: () => setState(() =>
+                                        _obscurePassword = !_obscurePassword),
                                   ),
                                 ),
-                                validator: (v) =>
-                                    v == null || v.isEmpty ? 'Enter password' : null,
+                                validator: (v) => v == null || v.isEmpty
+                                    ? 'Enter password'
+                                    : null,
                                 textInputAction: TextInputAction.done,
                                 onFieldSubmitted: (_) => _login(),
                               ),
@@ -283,7 +279,8 @@ class _LoginScreenState extends State<LoginScreen>
                             color: const Color(0xFF00D4AA).withOpacity(0.08),
                             borderRadius: BorderRadius.circular(10),
                             border: Border.all(
-                                color: const Color(0xFF00D4AA).withOpacity(0.2)),
+                                color:
+                                    const Color(0xFF00D4AA).withOpacity(0.2)),
                           ),
                           child: Row(
                             mainAxisSize: MainAxisSize.min,

@@ -56,7 +56,8 @@ class _HomeScreenState extends State<HomeScreen> {
         actions: [
           TextButton(
             onPressed: () => Navigator.pop(ctx, false),
-            child: const Text('Cancel', style: TextStyle(color: Colors.white54)),
+            child:
+                const Text('Cancel', style: TextStyle(color: Colors.white54)),
           ),
           ElevatedButton(
             onPressed: () => Navigator.pop(ctx, true),
@@ -90,13 +91,13 @@ class _HomeScreenState extends State<HomeScreen> {
               width: 34,
               height: 34,
               decoration: BoxDecoration(
-                gradient: const LinearGradient(
-                  colors: [Color(0xFF00D4AA), Color(0xFF7B61FF)],
-                ),
                 borderRadius: BorderRadius.circular(10),
               ),
-              child: const Icon(Icons.qr_code_scanner_rounded,
-                  color: Colors.white, size: 18),
+              clipBehavior: Clip.antiAlias,
+              child: Image.asset(
+                'assets/app_logo.jpg',
+                fit: BoxFit.cover,
+              ),
             ),
             const SizedBox(width: 10),
             Text('App Scan',
@@ -112,8 +113,8 @@ class _HomeScreenState extends State<HomeScreen> {
             decoration: BoxDecoration(
               color: const Color(0xFF00D4AA).withOpacity(0.12),
               borderRadius: BorderRadius.circular(20),
-              border: Border.all(
-                  color: const Color(0xFF00D4AA).withOpacity(0.25)),
+              border:
+                  Border.all(color: const Color(0xFF00D4AA).withOpacity(0.25)),
             ),
             child: Row(
               mainAxisSize: MainAxisSize.min,
@@ -142,8 +143,8 @@ class _HomeScreenState extends State<HomeScreen> {
       bottomNavigationBar: Container(
         decoration: BoxDecoration(
           color: const Color(0xFF0F1923),
-          border: Border(
-              top: BorderSide(color: Colors.white.withOpacity(0.08))),
+          border:
+              Border(top: BorderSide(color: Colors.white.withOpacity(0.08))),
         ),
         child: NavigationBar(
           backgroundColor: Colors.transparent,

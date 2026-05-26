@@ -1,115 +1,176 @@
+import 'dart:convert';
 import 'dart:io';
 import 'package:csv/csv.dart';
 import 'package:excel/excel.dart';
+import 'package:flutter/material.dart';
 import 'package:path_provider/path_provider.dart';
+import 'package:path/path.dart' as p;
 import 'package:share_plus/share_plus.dart';
 import 'package:intl/intl.dart';
-import '../models/scan_record.dart';
 
 class ExportService {
-  static Future<void> exportToCSV(List<ScanRecord> records) async {
-    final List<List<dynamic>> rows = [
-      ['#', 'Name', 'Phone', 'Raw Data', 'Encrypted', 'Scan Count', 'Last Scanned'],
-    ];
+  static Future<File> _saveToDownloads(
+    String fileName,
+    List<int> bytes,
+  ) async {
+    Directory dir;
 
-    for (int i = 0; i < records.length; i++) {
-      final r = records[i];
-      rows.add([
-        i + 1,
-        r.decryptedName ?? '',
-        r.decryptedPhone ?? '',
-        r.rawData,
-        r.isEncrypted ? 'Yes' : 'No',
-        r.scanCount,
-        DateFormat('dd/MM/yyyy HH:mm').format(r.scannedAt),
-      ]);
+    if (Platform.isAndroid) {
+      dir = Directory('/storage/emulated/0/Download');
+
+      if (!await dir.exists()) {
+        await dir.create(recursive: true);
+      }
+    } else {
+      dir = await getApplicationDocumentsDirectory();
     }
 
-    final csv = const ListToCsvConverter().convert(rows);
-    final dir = await getTemporaryDirectory();
-    final fileName = 'app_scan_export_${DateFormat('yyyyMMdd_HHmmss').format(DateTime.now())}.csv';
-    final file = File('${dir.path}/$fileName');
-    await file.writeAsString(csv);
+    final file = File(p.join(dir.path, fileName));
 
-    await Share.shareXFiles(
-      [XFile(file.path)],
-      subject: 'App Scan - QR Scan Data Export',
-      text: 'Exported ${records.length} scan records from App Scan.',
-    );
+    await file.writeAsBytes(bytes);
+
+    return file;
   }
 
-  static Future<void> exportToExcel(List<ScanRecord> records) async {
-    final excel = Excel.createExcel();
-    excel.rename('Sheet1', 'Scan Records');
-    final sheet = excel['Scan Records'];
+  /// Exports a list of records to an Excel file and shares it.
+  ///
+  /// The [records] are a list of maps, where each map must contain
+  /// 'name', 'phone', and 'scanCount' keys.
+  static Future<void> exportToExcel(
+      BuildContext context, List<Map<String, Object?>> records) async {
+    try {
+      final excel = Excel.createExcel();
+      excel.rename('Sheet1', 'Scan Report');
+      final sheet = excel['Scan Report'];
 
-    // Header row
-    final headers = [
-      '#', 'Name', 'Phone', 'Raw Data', 'Encrypted', 'Scan Count', 'Last Scanned'
-    ];
-
-    final headerStyle = CellStyle(
-      bold: true,
-      backgroundColorHex: ExcelColor.fromHexString('#1A7A6E'),
-      fontColorHex: ExcelColor.fromHexString('#FFFFFF'),
-      horizontalAlign: HorizontalAlign.Center,
-    );
-
-    for (int col = 0; col < headers.length; col++) {
-      final cell = sheet.cell(CellIndex.indexByColumnRow(columnIndex: col, rowIndex: 0));
-      cell.value = TextCellValue(headers[col]);
-      cell.cellStyle = headerStyle;
-    }
-
-    // Data rows
-    for (int i = 0; i < records.length; i++) {
-      final r = records[i];
-      final rowData = [
-        (i + 1).toString(),
-        r.decryptedName ?? '',
-        r.decryptedPhone ?? '',
-        r.rawData,
-        r.isEncrypted ? 'Yes' : 'No',
-        r.scanCount.toString(),
-        DateFormat('dd/MM/yyyy HH:mm').format(r.scannedAt),
+      // --- Header Row ---
+      final headers = [
+        'Name',
+        'Phone',
+        'Scan Count',
       ];
+      sheet.appendRow(headers.map((header) => TextCellValue(header)).toList());
 
-      final rowStyle = CellStyle(
-        backgroundColorHex: i % 2 == 0
-            ? ExcelColor.fromHexString('#1A2535')
-            : ExcelColor.fromHexString('#0F1923'),
-        fontColorHex: ExcelColor.fromHexString('#FFFFFF'),
-      );
+      // --- Data Rows ---
+      for (final record in records) {
+        sheet.appendRow([
+          TextCellValue(record['name']?.toString() ?? ''),
+          TextCellValue(record['phone']?.toString() ?? ''),
+          IntCellValue((record['scanCount'] as num?)?.toInt() ?? 0),
+        ]);
+      }
 
-      for (int col = 0; col < rowData.length; col++) {
-        final cell = sheet.cell(
-          CellIndex.indexByColumnRow(columnIndex: col, rowIndex: i + 1),
+      // --- Auto-fit columns for better readability ---
+      for (var i = 0; i < headers.length; i++) {
+        sheet.setColumnAutoFit(i);
+      }
+
+      // --- Save and Share ---
+      final dateFormat = DateFormat('yyyy-MM-dd_HH-mm-ss');
+      final timestamp = dateFormat.format(DateTime.now());
+      final fileName = 'scan_report_$timestamp.xlsx';
+
+      // Encode the Excel file
+      final bytes = excel.encode();
+
+      if (bytes != null) {
+        final file = await _saveToDownloads(
+          fileName,
+          bytes,
         );
-        cell.value = TextCellValue(rowData[col]);
-        cell.cellStyle = rowStyle;
+
+        // Show a confirmation SnackBar if the context is still mounted
+        if (context.mounted) {
+          ScaffoldMessenger.of(context).showSnackBar(
+            SnackBar(
+              content: Text('Saved report to ${file.path}'),
+              duration: const Duration(seconds: 4),
+            ),
+          );
+        }
+
+        // Share the file
+        await Share.shareXFiles(
+          [XFile(file.path)],
+          subject: 'QR Scan Report',
+          text: 'Exported ${records.length} records in a scan report.',
+        );
+      }
+    } catch (e, stackTrace) {
+      debugPrint('Failed to export report: $e');
+      debugPrint(stackTrace.toString());
+      if (context.mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(
+            content: Text('Error exporting report: $e'),
+            backgroundColor: Theme.of(context).colorScheme.error,
+          ),
+        );
       }
     }
+  }
 
-    // Set column widths
-    sheet.setColumnWidth(0, 5);
-    sheet.setColumnWidth(1, 20);
-    sheet.setColumnWidth(2, 18);
-    sheet.setColumnWidth(3, 40);
-    sheet.setColumnWidth(4, 12);
-    sheet.setColumnWidth(5, 12);
-    sheet.setColumnWidth(6, 22);
+  /// Exports a list of records to a CSV file and shares it.
+  ///
+  /// The [records] are a list of maps, where each map must contain
+  /// 'name', 'phone', and 'scanCount' keys.
+  static Future<void> exportToCSV(
+      BuildContext context, List<Map<String, Object?>> records) async {
+    try {
+      // --- Header and Data Rows ---
+      final List<List<dynamic>> rows = [
+        ['Name', 'Phone', 'Scan Count'], // Header
+      ];
 
-    final dir = await getTemporaryDirectory();
-    final fileName = 'app_scan_export_${DateFormat('yyyyMMdd_HHmmss').format(DateTime.now())}.xlsx';
-    final file = File('${dir.path}/$fileName');
-    final bytes = excel.encode();
-    if (bytes != null) {
-      await file.writeAsBytes(bytes);
+      for (final record in records) {
+        rows.add([
+          record['name']?.toString() ?? '',
+          record['phone']?.toString() ?? '',
+          record['scanCount'],
+        ]);
+      }
+
+      // --- Convert to CSV String ---
+      final csvString = const ListToCsvConverter().convert(rows);
+
+      // --- Save and Share ---
+      final dateFormat = DateFormat('yyyy-MM-dd_HH-mm-ss');
+      final timestamp = dateFormat.format(DateTime.now());
+      final fileName = 'scan_report_$timestamp.csv';
+
+      // Encode the CSV string to bytes
+      final bytes = utf8.encode(csvString);
+
+      // Use the existing _saveToDownloads helper
+      final file = await _saveToDownloads(fileName, bytes);
+
+      // Show confirmation SnackBar
+      if (context.mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(
+            content: Text('Saved report to ${file.path}'),
+            duration: const Duration(seconds: 4),
+          ),
+        );
+      }
+
+      // Share the file
       await Share.shareXFiles(
         [XFile(file.path)],
-        subject: 'App Scan - QR Scan Data Export',
-        text: 'Exported ${records.length} scan records from App Scan.',
+        subject: 'QR Scan Report',
+        text: 'Exported ${records.length} records in a scan report.',
       );
+    } catch (e, stackTrace) {
+      debugPrint('Failed to export CSV report: $e');
+      debugPrint(stackTrace.toString());
+      if (context.mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(
+            content: Text('Error exporting CSV report: $e'),
+            backgroundColor: Theme.of(context).colorScheme.error,
+          ),
+        );
+      }
     }
   }
 }

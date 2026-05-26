@@ -132,7 +132,7 @@ class _ScanScreenState extends State<ScanScreen> {
             ),
             const SizedBox(height: 12),
             Text(
-              'Point your camera at any QR code.\nEncrypted App Scan QR codes will\nbe automatically decrypted.',
+              'Scan QR codes\nPoint your camera at QR code.',
               textAlign: TextAlign.center,
               style: GoogleFonts.spaceGrotesk(
                 fontSize: 15,
@@ -191,7 +191,7 @@ class _ScanScreenState extends State<ScanScreen> {
                           borderRadius: BorderRadius.circular(8),
                         ),
                         child: Text(
-                          '×${_lastScanned!.scanCount}',
+                          '×${_lastScanned!.numScanCount}',
                           style: GoogleFonts.spaceGrotesk(
                               color: const Color(0xFF00D4AA),
                               fontWeight: FontWeight.w700,
@@ -265,8 +265,7 @@ class _ScanScreenState extends State<ScanScreen> {
           right: 0,
           child: Center(
             child: Container(
-              padding:
-                  const EdgeInsets.symmetric(horizontal: 20, vertical: 10),
+              padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 10),
               decoration: BoxDecoration(
                 color: Colors.black54,
                 borderRadius: BorderRadius.circular(30),
@@ -350,8 +349,8 @@ class _ScanOverlayPainter extends CustomPainter {
     _drawCorner(canvas, borderPaint, left, top, r, cornerLen, 1, 1);
     _drawCorner(canvas, borderPaint, left + scanSize, top, r, cornerLen, -1, 1);
     _drawCorner(canvas, borderPaint, left, top + scanSize, r, cornerLen, 1, -1);
-    _drawCorner(
-        canvas, borderPaint, left + scanSize, top + scanSize, r, cornerLen, -1, -1);
+    _drawCorner(canvas, borderPaint, left + scanSize, top + scanSize, r,
+        cornerLen, -1, -1);
   }
 
   void _drawCorner(Canvas canvas, Paint paint, double x, double y, double r,
@@ -390,7 +389,9 @@ class _ScanResultSheet extends StatelessWidget {
                   borderRadius: BorderRadius.circular(12),
                 ),
                 child: Icon(
-                  record.isEncrypted ? Icons.lock_rounded : Icons.qr_code_rounded,
+                  record.isEncrypted
+                      ? Icons.lock_rounded
+                      : Icons.qr_code_rounded,
                   color: record.isEncrypted
                       ? const Color(0xFF7B61FF)
                       : const Color(0xFF00D4AA),
@@ -403,14 +404,16 @@ class _ScanResultSheet extends StatelessWidget {
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
                     Text(
-                      record.isEncrypted ? 'Encrypted QR Scanned' : 'QR Code Scanned',
+                      record.isEncrypted
+                          ? 'Encrypted QR Scanned'
+                          : 'QR Code Scanned',
                       style: GoogleFonts.spaceGrotesk(
                           color: Colors.white,
                           fontWeight: FontWeight.w700,
                           fontSize: 17),
                     ),
                     Text(
-                      'Scanned ${record.scanCount} time${record.scanCount > 1 ? 's' : ''}',
+                      'Scanned ${record.numScanCount} time${record.numScanCount! > 1 ? 's' : ''}',
                       style: GoogleFonts.spaceGrotesk(
                           color: Colors.white54, fontSize: 13),
                     ),
@@ -425,7 +428,7 @@ class _ScanResultSheet extends StatelessWidget {
                   borderRadius: BorderRadius.circular(20),
                 ),
                 child: Text(
-                  '×${record.scanCount}',
+                  '×${record.numScanCount}',
                   style: GoogleFonts.spaceGrotesk(
                       color: const Color(0xFF00D4AA),
                       fontWeight: FontWeight.w800,
@@ -438,10 +441,15 @@ class _ScanResultSheet extends StatelessWidget {
           const Divider(color: Colors.white12),
           const SizedBox(height: 16),
           if (record.decryptedName != null && record.decryptedName!.isNotEmpty)
-            _InfoRow(label: 'Name', value: record.decryptedName!,
+            _InfoRow(
+                label: 'Name',
+                value: record.decryptedName!,
                 icon: Icons.person_outline),
-          if (record.decryptedPhone != null && record.decryptedPhone!.isNotEmpty)
-            _InfoRow(label: 'Phone', value: record.decryptedPhone!,
+          if (record.decryptedPhone != null &&
+              record.decryptedPhone!.isNotEmpty)
+            _InfoRow(
+                label: 'Phone',
+                value: record.decryptedPhone!,
                 icon: Icons.phone_outlined),
           _InfoRow(
               label: 'Data',

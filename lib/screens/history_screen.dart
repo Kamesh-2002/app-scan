@@ -1,3 +1,4 @@
+import 'package:app_scan/services/export_service_scanrecord.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:google_fonts/google_fonts.dart';
@@ -125,7 +126,8 @@ class _HistoryScreenState extends State<HistoryScreen> {
     }
   }
 
-  void _showExportSheet() {
+  void _showExportSheet(List<Map<String, Object?>>? sheetMapRecords,
+      List<ScanRecord>? sheetScanRecords, bool isScan) {
     showModalBottomSheet(
       context: context,
       backgroundColor: const Color(0xFF1A2535),
@@ -156,7 +158,12 @@ class _HistoryScreenState extends State<HistoryScreen> {
               onTap: () async {
                 Navigator.pop(ctx);
                 setState(() => _isExporting = true);
-                await ExportService.exportToCSV(context,_records);
+                if (isScan) {
+                  await ExportServiceScanRecord.exportToCSV(
+                      context, sheetScanRecords!);
+                } else {
+                  await ExportService.exportToCSV(context, sheetMapRecords!);
+                }
                 if (mounted) setState(() => _isExporting = false);
               },
             ),
@@ -169,7 +176,12 @@ class _HistoryScreenState extends State<HistoryScreen> {
               onTap: () async {
                 Navigator.pop(ctx);
                 setState(() => _isExporting = true);
-                await ExportService.exportToExcel(context,_records);
+                if (isScan) {
+                  await ExportServiceScanRecord.exportToExcel(
+                      context, sheetScanRecords!);
+                } else {
+                  await ExportService.exportToExcel(context, sheetMapRecords!);
+                }
                 if (mounted) setState(() => _isExporting = false);
               },
             ),
@@ -246,6 +258,14 @@ class _HistoryScreenState extends State<HistoryScreen> {
                         ),
                       ],
                     ),
+                  ),
+                  _ActionIconBtn(
+                    icon: Icons.upload_rounded,
+                    color: const Color(0xFF00D4AA),
+                    onTap: () {
+                      _showExportSheet(null, records, true);
+                    },
+                    tooltip: 'Export',
                   ),
                 ],
               ),
@@ -343,8 +363,7 @@ class _HistoryScreenState extends State<HistoryScreen> {
                           const SizedBox(width: 12),
                           Expanded(
                             child: Text(
-                              DateFormat('dd MMM yy')
-                                .format(scan.scannedAt),
+                              DateFormat('dd MMM yy').format(scan.scannedAt),
                               style: GoogleFonts.spaceGrotesk(
                                 color: Colors.white70,
                                 fontSize: 14,
@@ -435,18 +454,20 @@ class _HistoryScreenState extends State<HistoryScreen> {
                       _ActionIconBtn(
                         icon: Icons.upload_rounded,
                         color: const Color(0xFF00D4AA),
-                        onTap: _showExportSheet,
+                        onTap: () {
+                          _showExportSheet(_records, null, false);
+                        },
                         tooltip: 'Export',
                       ),
-                    if (_records.isNotEmpty) ...[
-                      const SizedBox(width: 6),
-                      _ActionIconBtn(
-                        icon: Icons.delete_sweep_rounded,
-                        color: Colors.redAccent,
-                        onTap: _clearAll,
-                        tooltip: 'Clear All',
-                      ),
-                    ],
+                    // if (_records.isNotEmpty) ...[
+                    //   const SizedBox(width: 6),
+                    //   _ActionIconBtn(
+                    //     icon: Icons.delete_sweep_rounded,
+                    //     color: Colors.redAccent,
+                    //     onTap: _clearAll,
+                    //     tooltip: 'Clear All',
+                    //   ),
+                    // ],
                   ],
                 ),
               ],

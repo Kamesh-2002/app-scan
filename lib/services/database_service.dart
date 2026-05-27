@@ -51,7 +51,7 @@ class DatabaseService {
 
     if (existing.isNotEmpty) {
       final existingRecord = ScanRecord.fromMap(existing.first);
-      newCount = existing.length;
+      newCount = existing.length + 1;
     }
     else{
       newCount = 1;

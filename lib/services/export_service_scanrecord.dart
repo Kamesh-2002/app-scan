@@ -8,7 +8,7 @@ import 'package:share_plus/share_plus.dart';
 import 'package:intl/intl.dart';
 import '../models/scan_record.dart';
 
-class ExportService {
+class ExportServiceScanRecord {
   static Future<File> _saveToDownloads(
     String fileName,
     List<int> bytes,

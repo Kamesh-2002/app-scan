@@ -78,7 +78,10 @@ class _ScanScreenState extends State<ScanScreen> {
       shape: const RoundedRectangleBorder(
         borderRadius: BorderRadius.vertical(top: Radius.circular(24)),
       ),
-      builder: (ctx) => _ScanResultSheet(record: record),
+      builder: (ctx) => _ScanResultSheet(
+        record: record,
+        stopScanner: _stopScanner,
+      ),
     );
   }
 
@@ -368,7 +371,8 @@ class _ScanOverlayPainter extends CustomPainter {
 
 class _ScanResultSheet extends StatelessWidget {
   final ScanRecord record;
-  const _ScanResultSheet({required this.record});
+  final VoidCallback stopScanner;
+  const _ScanResultSheet({required this.record, required this.stopScanner});
 
   @override
   Widget build(BuildContext context) {
@@ -461,7 +465,10 @@ class _ScanResultSheet extends StatelessWidget {
           SizedBox(
             width: double.infinity,
             child: ElevatedButton(
-              onPressed: () => Navigator.pop(context),
+              onPressed: () {
+                stopScanner();
+                Navigator.pop(context);
+              },
               child: const Text('Done'),
             ),
           ),

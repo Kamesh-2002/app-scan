@@ -96,7 +96,7 @@ class _LoginScreenState extends State<LoginScreen>
       if (mounted) {
         setState(() {
           _isLoading = false;
-          _errorMessage = 'Biometric authentication error. Try again.';
+          _errorMessage = 'Error: ${e.toString()}'; // <-- change this line
         });
       }
     }
@@ -383,8 +383,7 @@ class _LoginScreenState extends State<LoginScreen>
                                       padding: const EdgeInsets.symmetric(
                                           vertical: 14),
                                       side: const BorderSide(
-                                          color: Color(0xFF00D4AA),
-                                          width: 1.5),
+                                          color: Color(0xFF00D4AA), width: 1.5),
                                       shape: RoundedRectangleBorder(
                                         borderRadius: BorderRadius.circular(14),
                                       ),

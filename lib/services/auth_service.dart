@@ -29,9 +29,11 @@ class AuthService {
     await initDefaultCredentials();
     final prefs = await SharedPreferences.getInstance();
     final storedUsername = prefs.getString(_usernameKey) ?? defaultUsername;
-    final storedPasswordHash = prefs.getString(_passwordKey) ?? _hashPassword(defaultPassword);
+    final storedPasswordHash =
+        prefs.getString(_passwordKey) ?? _hashPassword(defaultPassword);
 
-    if (username == storedUsername && _hashPassword(password) == storedPasswordHash) {
+    if (username == storedUsername &&
+        _hashPassword(password) == storedPasswordHash) {
       await prefs.setBool(_isLoggedInKey, true);
       return true;
     }
@@ -55,7 +57,8 @@ class AuthService {
   }
 
   static Future<bool> loginWithBiometrics() async {
-  // Return true if a valid saved session exists, or implement your own logic
-  return isLoggedIn();
-}
+    // Return true if a valid saved session exists, or implement your own logic
+    final bool result = await login(defaultUsername,defaultPassword);
+    return result;
+  }
 }

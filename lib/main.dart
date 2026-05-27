@@ -1,3 +1,4 @@
+import 'package:app_scan/services/auth_service.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:google_fonts/google_fonts.dart';
@@ -14,8 +15,40 @@ void main() async {
   runApp(const AppScan());
 }
 
-class AppScan extends StatelessWidget {
+class AppScan extends StatefulWidget {
   const AppScan({super.key});
+
+  @override
+  State<AppScan> createState() => _AppScanState();
+}
+
+class _AppScanState extends State<AppScan>
+    with WidgetsBindingObserver {
+
+  @override
+  void initState() {
+    super.initState();
+
+    WidgetsBinding.instance.addObserver(this);
+  }
+
+  @override
+  void dispose() {
+
+    WidgetsBinding.instance.removeObserver(this);
+
+    super.dispose();
+  }
+
+  @override
+  void didChangeAppLifecycleState(AppLifecycleState state) {
+
+    if (state == AppLifecycleState.paused) {
+
+      AuthService.logout();
+
+    }
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -68,7 +101,10 @@ class AppScan extends StatelessWidget {
           ),
           focusedBorder: OutlineInputBorder(
             borderRadius: BorderRadius.circular(12),
-            borderSide: const BorderSide(color: Color(0xFF00D4AA), width: 2),
+            borderSide: const BorderSide(
+              color: Color(0xFF00D4AA),
+              width: 2,
+            ),
           ),
           labelStyle: const TextStyle(color: Colors.white60),
           hintStyle: const TextStyle(color: Colors.white38),
@@ -77,8 +113,13 @@ class AppScan extends StatelessWidget {
           style: ElevatedButton.styleFrom(
             backgroundColor: const Color(0xFF00D4AA),
             foregroundColor: const Color(0xFF0A1118),
-            padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 16),
-            shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
+            padding: const EdgeInsets.symmetric(
+              horizontal: 24,
+              vertical: 16,
+            ),
+            shape: RoundedRectangleBorder(
+              borderRadius: BorderRadius.circular(12),
+            ),
             textStyle: GoogleFonts.spaceGrotesk(
               fontSize: 16,
               fontWeight: FontWeight.w700,

@@ -455,12 +455,12 @@ class _ScanResultSheet extends StatelessWidget {
                 label: 'Phone',
                 value: record.decryptedPhone!,
                 icon: Icons.phone_outlined),
-          _InfoRow(
-              label: 'Data',
-              value: record.rawData.length > 60
-                  ? '${record.rawData.substring(0, 60)}...'
-                  : record.rawData,
-              icon: Icons.data_object_rounded),
+          // _InfoRow(
+          //     label: 'Data',
+          //     value: record.rawData.length > 60
+          //         ? '${record.rawData.substring(0, 60)}...'
+          //         : record.rawData,
+          //     icon: Icons.data_object_rounded),
           const SizedBox(height: 20),
           SizedBox(
             width: double.infinity,

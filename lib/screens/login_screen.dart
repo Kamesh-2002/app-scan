@@ -86,7 +86,7 @@ class _LoginScreenState extends State<LoginScreen>
             );
           } else {
             setState(() =>
-                _errorMessage = 'Biometric login failed. Please use password.');
+                _errorMessage = 'Biometric login failed.\n Please use password.');
           }
         }
       } else {
@@ -96,7 +96,7 @@ class _LoginScreenState extends State<LoginScreen>
       if (mounted) {
         setState(() {
           _isLoading = false;
-          _errorMessage = 'Error: ${e.toString()}'; // <-- change this line
+          _errorMessage = 'Error:\n ${e.toString()}'; // <-- change this line
         });
       }
     }

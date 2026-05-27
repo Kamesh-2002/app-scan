@@ -152,7 +152,7 @@ class _HistoryScreenState extends State<HistoryScreen> {
             const SizedBox(height: 24),
             _ExportOption(
               icon: Icons.table_chart_rounded,
-              color: const Color(0xFF00D4AA),
+              color: const Color(0xFFF51424),
               title: 'Export as CSV',
               subtitle: 'Compatible with spreadsheet apps',
               onTap: () async {
@@ -170,7 +170,7 @@ class _HistoryScreenState extends State<HistoryScreen> {
             const SizedBox(height: 12),
             _ExportOption(
               icon: Icons.grid_on_rounded,
-              color: const Color(0xFF7B61FF),
+              color: const Color(0xFFF8C700),
               title: 'Export as Excel',
               subtitle: 'Styled .xlsx with formatted columns',
               onTap: () async {
@@ -230,12 +230,12 @@ class _HistoryScreenState extends State<HistoryScreen> {
                   Container(
                     padding: const EdgeInsets.all(12),
                     decoration: BoxDecoration(
-                      color: const Color(0xFF00D4AA).withOpacity(0.15),
+                      color: const Color(0xFFF51424).withOpacity(0.15),
                       borderRadius: BorderRadius.circular(14),
                     ),
                     child: Icon(
                       Icons.lock_rounded,
-                      color: const Color(0xFF7B61FF),
+                      color: const Color(0xFFF8C700),
                       size: 26,
                     ),
                   ),
@@ -261,7 +261,7 @@ class _HistoryScreenState extends State<HistoryScreen> {
                   ),
                   _ActionIconBtn(
                     icon: Icons.upload_rounded,
-                    color: const Color(0xFF00D4AA),
+                    color: const Color(0xFFF51424),
                     onTap: () {
                       _showExportSheet(null, records, true);
                     },
@@ -278,13 +278,13 @@ class _HistoryScreenState extends State<HistoryScreen> {
                 decoration: BoxDecoration(
                   gradient: LinearGradient(
                     colors: [
-                      const Color(0xFF00D4AA).withOpacity(0.15),
-                      const Color(0xFF7B61FF).withOpacity(0.08),
+                      const Color(0xFFF51424).withOpacity(0.15),
+                      const Color(0xFFF8C700).withOpacity(0.08),
                     ],
                   ),
                   borderRadius: BorderRadius.circular(16),
                   border: Border.all(
-                      color: const Color(0xFF00D4AA).withOpacity(0.25)),
+                      color: const Color(0xFFF51424).withOpacity(0.25)),
                 ),
                 child: Row(
                   mainAxisAlignment: MainAxisAlignment.spaceBetween,
@@ -305,7 +305,7 @@ class _HistoryScreenState extends State<HistoryScreen> {
                       ],
                     ),
                     const Icon(Icons.qr_code_scanner_rounded,
-                        color: Color(0xFF00D4AA), size: 36),
+                        color: Color(0xFFF51424), size: 36),
                   ],
                 ),
               ),
@@ -357,13 +357,14 @@ class _HistoryScreenState extends State<HistoryScreen> {
                         children: [
                           const Icon(
                             Icons.access_time_rounded,
-                            color: Color(0xFF00D4AA),
+                            color: Color(0xFFF51424),
                             size: 18,
                           ),
                           const SizedBox(width: 12),
                           Expanded(
                             child: Text(
-                              DateFormat('dd MMM yy HH:mm:ss').format(scan.scannedAt),
+                              DateFormat('dd MMM yy HH:mm:ss')
+                                  .format(scan.scannedAt),
                               style: GoogleFonts.spaceGrotesk(
                                 color: Colors.white70,
                                 fontSize: 14,
@@ -419,14 +420,14 @@ class _HistoryScreenState extends State<HistoryScreen> {
                     _StatChip(
                       label: 'Unique QRs',
                       value: '${_records.length}',
-                      color: const Color(0xFF00D4AA),
+                      color: const Color(0xFFF51424),
                       icon: Icons.qr_code_2_rounded,
                     ),
                     const SizedBox(width: 10),
                     _StatChip(
                       label: 'Total Scans',
                       value: '$totalScans',
-                      color: const Color(0xFF7B61FF),
+                      color: const Color(0xFFF8C700),
                       icon: Icons.bar_chart_rounded,
                     ),
                   ],
@@ -453,7 +454,7 @@ class _HistoryScreenState extends State<HistoryScreen> {
                     if (_records.isNotEmpty)
                       _ActionIconBtn(
                         icon: Icons.upload_rounded,
-                        color: const Color(0xFF00D4AA),
+                        color: const Color(0xFFF51424),
                         onTap: () {
                           _showExportSheet(_records, null, false);
                         },
@@ -478,12 +479,12 @@ class _HistoryScreenState extends State<HistoryScreen> {
           Expanded(
             child: _isLoading
                 ? const Center(
-                    child: CircularProgressIndicator(color: Color(0xFF00D4AA)))
+                    child: CircularProgressIndicator(color: Color(0xFFF51424)))
                 : _filtered.isEmpty
                     ? _buildEmpty()
                     : RefreshIndicator(
                         onRefresh: _loadRecords,
-                        color: const Color(0xFF00D4AA),
+                        color: const Color(0xFFF51424),
                         backgroundColor: const Color(0xFF1A2535),
                         child: ListView.builder(
                           padding: const EdgeInsets.fromLTRB(16, 4, 16, 24),
@@ -506,7 +507,7 @@ class _HistoryScreenState extends State<HistoryScreen> {
                 color: const Color(0xFF1A2535),
                 borderRadius: BorderRadius.circular(30),
                 border:
-                    Border.all(color: const Color(0xFF00D4AA).withOpacity(0.4)),
+                    Border.all(color: const Color(0xFFF51424).withOpacity(0.4)),
               ),
               child: Row(
                 mainAxisSize: MainAxisSize.min,
@@ -515,7 +516,7 @@ class _HistoryScreenState extends State<HistoryScreen> {
                     width: 18,
                     height: 18,
                     child: CircularProgressIndicator(
-                        strokeWidth: 2, color: Color(0xFF00D4AA)),
+                        strokeWidth: 2, color: Color(0xFFF51424)),
                   ),
                   const SizedBox(width: 10),
                   Text('Exporting...',
@@ -667,7 +668,7 @@ class _ScanTile extends StatelessWidget {
               width: 44,
               height: 44,
               decoration: BoxDecoration(
-                color: Color(0xFF00D4AA).withOpacity(0.12),
+                color: Color(0xFFF51424).withOpacity(0.12),
                 borderRadius: BorderRadius.circular(12),
               ),
               child: Icon(
@@ -707,13 +708,13 @@ class _ScanTile extends StatelessWidget {
                   padding:
                       const EdgeInsets.symmetric(horizontal: 10, vertical: 4),
                   decoration: BoxDecoration(
-                    color: const Color(0xFF00D4AA).withOpacity(0.12),
+                    color: const Color(0xFFF51424).withOpacity(0.12),
                     borderRadius: BorderRadius.circular(20),
                   ),
                   child: Text(
                     '×${record["scanCount"]}',
                     style: GoogleFonts.spaceGrotesk(
-                        color: const Color(0xFF00D4AA),
+                        color: const Color(0xFFF51424),
                         fontWeight: FontWeight.w800,
                         fontSize: 13),
                   ),
@@ -799,7 +800,7 @@ class _DetailRow extends StatelessWidget {
       child: Row(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          Icon(icon, color: const Color(0xFF00D4AA), size: 18),
+          Icon(icon, color: const Color(0xFFF51424), size: 18),
           const SizedBox(width: 12),
           Expanded(
             child: Column(

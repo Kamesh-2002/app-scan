@@ -109,7 +109,7 @@ class _ScanScreenState extends State<ScanScreen> {
               decoration: BoxDecoration(
                 gradient: RadialGradient(
                   colors: [
-                    const Color(0xFF00D4AA).withOpacity(0.15),
+                    const Color(0xFFF51424).withOpacity(0.15),
                     Colors.transparent,
                   ],
                 ),
@@ -118,7 +118,7 @@ class _ScanScreenState extends State<ScanScreen> {
               child: const Icon(
                 Icons.qr_code_scanner_rounded,
                 size: 80,
-                color: Color(0xFF00D4AA),
+                color: Color(0xFFF51424),
               ),
             ),
             const SizedBox(height: 32),
@@ -159,12 +159,12 @@ class _ScanScreenState extends State<ScanScreen> {
                     color: const Color(0xFF1A2535),
                     borderRadius: BorderRadius.circular(16),
                     border: Border.all(
-                        color: const Color(0xFF00D4AA).withOpacity(0.3)),
+                        color: const Color(0xFFF51424).withOpacity(0.3)),
                   ),
                   child: Row(
                     children: [
                       const Icon(Icons.check_circle_rounded,
-                          color: Color(0xFF00D4AA), size: 20),
+                          color: Color(0xFFF51424), size: 20),
                       const SizedBox(width: 12),
                       Expanded(
                         child: Column(
@@ -187,13 +187,13 @@ class _ScanScreenState extends State<ScanScreen> {
                         padding: const EdgeInsets.symmetric(
                             horizontal: 8, vertical: 4),
                         decoration: BoxDecoration(
-                          color: const Color(0xFF00D4AA).withOpacity(0.15),
+                          color: const Color(0xFFF51424).withOpacity(0.15),
                           borderRadius: BorderRadius.circular(8),
                         ),
                         child: Text(
                           '×${_lastScanned!.numScanCount}',
                           style: GoogleFonts.spaceGrotesk(
-                              color: const Color(0xFF00D4AA),
+                              color: const Color(0xFFF51424),
                               fontWeight: FontWeight.w700,
                               fontSize: 13),
                         ),
@@ -282,7 +282,7 @@ class _ScanScreenState extends State<ScanScreen> {
           Container(
             color: Colors.black45,
             child: const Center(
-              child: CircularProgressIndicator(color: Color(0xFF00D4AA)),
+              child: CircularProgressIndicator(color: Color(0xFFF51424)),
             ),
           ),
       ],
@@ -330,7 +330,7 @@ class _ScanOverlayPainter extends CustomPainter {
 
     // Corner brackets
     final borderPaint = Paint()
-      ..color = const Color(0xFF00D4AA)
+      ..color = const Color(0xFFF51424)
       ..strokeWidth = 3.5
       ..style = PaintingStyle.stroke
       ..strokeCap = StrokeCap.round;
@@ -384,8 +384,8 @@ class _ScanResultSheet extends StatelessWidget {
                 padding: const EdgeInsets.all(10),
                 decoration: BoxDecoration(
                   color: record.isEncrypted
-                      ? const Color(0xFF7B61FF).withOpacity(0.15)
-                      : const Color(0xFF00D4AA).withOpacity(0.15),
+                      ? const Color(0xFFF8C700).withOpacity(0.15)
+                      : const Color(0xFFF51424).withOpacity(0.15),
                   borderRadius: BorderRadius.circular(12),
                 ),
                 child: Icon(
@@ -393,8 +393,8 @@ class _ScanResultSheet extends StatelessWidget {
                       ? Icons.lock_rounded
                       : Icons.qr_code_rounded,
                   color: record.isEncrypted
-                      ? const Color(0xFF7B61FF)
-                      : const Color(0xFF00D4AA),
+                      ? const Color(0xFFF8C700)
+                      : const Color(0xFFF51424),
                   size: 24,
                 ),
               ),
@@ -424,13 +424,13 @@ class _ScanResultSheet extends StatelessWidget {
                 padding:
                     const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
                 decoration: BoxDecoration(
-                  color: const Color(0xFF00D4AA).withOpacity(0.15),
+                  color: const Color(0xFFF51424).withOpacity(0.15),
                   borderRadius: BorderRadius.circular(20),
                 ),
                 child: Text(
                   '×${record.numScanCount}',
                   style: GoogleFonts.spaceGrotesk(
-                      color: const Color(0xFF00D4AA),
+                      color: const Color(0xFFF51424),
                       fontWeight: FontWeight.w800,
                       fontSize: 16),
                 ),
@@ -485,7 +485,7 @@ class _InfoRow extends StatelessWidget {
       child: Row(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          Icon(icon, color: const Color(0xFF00D4AA), size: 18),
+          Icon(icon, color: const Color(0xFFF51424), size: 18),
           const SizedBox(width: 10),
           Column(
             crossAxisAlignment: CrossAxisAlignment.start,

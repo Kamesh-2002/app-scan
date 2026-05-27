@@ -25,20 +25,20 @@ class AppScan extends StatelessWidget {
       theme: ThemeData(
         useMaterial3: true,
         colorScheme: ColorScheme.fromSeed(
-          seedColor: const Color(0xFF00D4AA),
+          seedColor: const Color(0xFFF51424),       // Flame Red
           brightness: Brightness.dark,
-          primary: const Color(0xFF00D4AA),
-          secondary: const Color(0xFF7B61FF),
-          surface: const Color(0xFF0F1923),
-          background: const Color(0xFF0A1118),
+          primary: const Color(0xFFF51424),         // Flame Red → main accent
+          secondary: const Color(0xFFF8C700),       // Bright Gold → secondary accent
+          surface: const Color(0xFF0D0000),         // Near-black with red undertone
+          background: const Color(0xFF000000),      // Deep Black
         ),
         textTheme: GoogleFonts.spaceGroteskTextTheme().apply(
           bodyColor: Colors.white,
           displayColor: Colors.white,
         ),
-        scaffoldBackgroundColor: const Color(0xFF0A1118),
+        scaffoldBackgroundColor: const Color(0xFF000000),   // Deep Black
         appBarTheme: AppBarTheme(
-          backgroundColor: const Color(0xFF0F1923),
+          backgroundColor: const Color(0xFF0D0000),         // Deep surface
           foregroundColor: Colors.white,
           elevation: 0,
           titleTextStyle: GoogleFonts.spaceGrotesk(
@@ -48,35 +48,35 @@ class AppScan extends StatelessWidget {
           ),
         ),
         cardTheme: CardThemeData(
-          color: const Color(0xFF1A2535),
+          color: const Color(0xFF1A0005),                   // Dark red-tinted card
           elevation: 0,
           shape: RoundedRectangleBorder(
             borderRadius: BorderRadius.circular(16),
-            side: BorderSide(color: Colors.white.withOpacity(0.08)),
+            side: BorderSide(color: const Color(0xFF9B0D17).withOpacity(0.4)), // Dark Red border
           ),
         ),
         inputDecorationTheme: InputDecorationTheme(
           filled: true,
-          fillColor: const Color(0xFF1A2535),
+          fillColor: const Color(0xFF1A0005),               // Dark red-tinted fill
           border: OutlineInputBorder(
             borderRadius: BorderRadius.circular(12),
-            borderSide: BorderSide(color: Colors.white.withOpacity(0.1)),
+            borderSide: BorderSide(color: const Color(0xFF9B0D17).withOpacity(0.4)), // Dark Red
           ),
           enabledBorder: OutlineInputBorder(
             borderRadius: BorderRadius.circular(12),
-            borderSide: BorderSide(color: Colors.white.withOpacity(0.1)),
+            borderSide: BorderSide(color: const Color(0xFF9B0D17).withOpacity(0.4)), // Dark Red
           ),
           focusedBorder: OutlineInputBorder(
             borderRadius: BorderRadius.circular(12),
-            borderSide: const BorderSide(color: Color(0xFF00D4AA), width: 2),
+            borderSide: const BorderSide(color: Color(0xFFF51424), width: 2), // Flame Red
           ),
           labelStyle: const TextStyle(color: Colors.white60),
           hintStyle: const TextStyle(color: Colors.white38),
         ),
         elevatedButtonTheme: ElevatedButtonThemeData(
           style: ElevatedButton.styleFrom(
-            backgroundColor: const Color(0xFF00D4AA),
-            foregroundColor: const Color(0xFF0A1118),
+            backgroundColor: const Color(0xFFF51424),       // Flame Red
+            foregroundColor: const Color(0xFF000000),       // Deep Black text on button
             padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 16),
             shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
             textStyle: GoogleFonts.spaceGrotesk(

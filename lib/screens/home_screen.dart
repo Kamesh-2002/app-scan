@@ -111,19 +111,19 @@ class _HomeScreenState extends State<HomeScreen> {
             margin: const EdgeInsets.only(right: 8),
             padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
             decoration: BoxDecoration(
-              color: const Color(0xFF00D4AA).withOpacity(0.12),
+              color: const Color(0xFFF51424).withOpacity(0.12),
               borderRadius: BorderRadius.circular(20),
               border:
-                  Border.all(color: const Color(0xFF00D4AA).withOpacity(0.25)),
+                  Border.all(color: const Color(0xFFF51424).withOpacity(0.25)),
             ),
             child: Row(
               mainAxisSize: MainAxisSize.min,
               children: [
-                const Icon(Icons.qr_code_2, color: Color(0xFF00D4AA), size: 14),
+                const Icon(Icons.qr_code_2, color: Color(0xFFF51424), size: 14),
                 const SizedBox(width: 4),
                 Text('$_uniqueQRs',
                     style: GoogleFonts.spaceGrotesk(
-                        color: const Color(0xFF00D4AA),
+                        color: const Color(0xFFF51424),
                         fontWeight: FontWeight.w700,
                         fontSize: 13)),
               ],
@@ -148,7 +148,7 @@ class _HomeScreenState extends State<HomeScreen> {
         ),
         child: NavigationBar(
           backgroundColor: Colors.transparent,
-          indicatorColor: const Color(0xFF00D4AA).withOpacity(0.15),
+          indicatorColor: const Color(0xFFF51424).withOpacity(0.15),
           selectedIndex: _selectedIndex,
           onDestinationSelected: (index) {
             setState(() => _selectedIndex = index);
@@ -160,19 +160,19 @@ class _HomeScreenState extends State<HomeScreen> {
               icon: const Icon(Icons.qr_code_scanner_outlined,
                   color: Colors.white54),
               selectedIcon: const Icon(Icons.qr_code_scanner_rounded,
-                  color: Color(0xFF00D4AA)),
+                  color: Color(0xFFF51424)),
               label: 'Scan',
             ),
             NavigationDestination(
               icon: const Icon(Icons.history_outlined, color: Colors.white54),
               selectedIcon:
-                  const Icon(Icons.history_rounded, color: Color(0xFF00D4AA)),
+                  const Icon(Icons.history_rounded, color: Color(0xFFF51424)),
               label: 'History',
             ),
             NavigationDestination(
               icon: const Icon(Icons.add_box_outlined, color: Colors.white54),
               selectedIcon:
-                  const Icon(Icons.add_box_rounded, color: Color(0xFF00D4AA)),
+                  const Icon(Icons.add_box_rounded, color: Color(0xFFF51424)),
               label: 'Generate',
             ),
           ],

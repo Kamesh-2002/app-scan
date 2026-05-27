@@ -123,14 +123,14 @@ class _GenerateScreenState extends State<GenerateScreen>
 
       final dir;
       if (Platform.isAndroid) {
-      dir = Directory('/storage/emulated/0/Download');
+        dir = Directory('/storage/emulated/0/Download');
 
-      if (!await dir.exists()) {
-        await dir.create(recursive: true);
+        if (!await dir.exists()) {
+          await dir.create(recursive: true);
+        }
+      } else {
+        dir = await getApplicationDocumentsDirectory();
       }
-    } else {
-      dir = await getApplicationDocumentsDirectory();
-    }
       final fileName =
           'qr_${_nameCtrl.text.replaceAll(' ', '_')}_${DateTime.now().millisecondsSinceEpoch}.png';
       final file = File('${dir.path}/$fileName');
@@ -148,7 +148,7 @@ class _GenerateScreenState extends State<GenerateScreen>
                     style: GoogleFonts.spaceGrotesk(fontSize: 13)),
               ],
             ),
-            backgroundColor: const Color(0xFF00D4AA),
+            backgroundColor: const Color(0xFFF51424),
             behavior: SnackBarBehavior.floating,
             shape:
                 RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
@@ -184,26 +184,26 @@ class _GenerateScreenState extends State<GenerateScreen>
               decoration: BoxDecoration(
                 gradient: LinearGradient(
                   colors: [
-                    const Color(0xFF7B61FF).withOpacity(0.15),
-                    const Color(0xFF00D4AA).withOpacity(0.08),
+                    const Color(0xFFF8C700).withOpacity(0.15),
+                    const Color(0xFFF51424).withOpacity(0.08),
                   ],
                   begin: Alignment.topLeft,
                   end: Alignment.bottomRight,
                 ),
                 borderRadius: BorderRadius.circular(20),
                 border: Border.all(
-                    color: const Color(0xFF7B61FF).withOpacity(0.25)),
+                    color: const Color(0xFFF8C700).withOpacity(0.25)),
               ),
               child: Row(
                 children: [
                   Container(
                     padding: const EdgeInsets.all(12),
                     decoration: BoxDecoration(
-                      color: const Color(0xFF7B61FF).withOpacity(0.2),
+                      color: const Color(0xFFF8C700).withOpacity(0.2),
                       borderRadius: BorderRadius.circular(14),
                     ),
                     child: const Icon(Icons.add_box_rounded,
-                        color: Color(0xFF7B61FF), size: 26),
+                        color: Color(0xFFF8C700), size: 26),
                   ),
                   const SizedBox(width: 14),
                   Expanded(
@@ -215,10 +215,11 @@ class _GenerateScreenState extends State<GenerateScreen>
                                 color: Colors.white,
                                 fontSize: 18,
                                 fontWeight: FontWeight.w700)),
-                        Text(
-                            'Contact data is encrypted before encoding',
+                        Text('Contact data is encrypted before encoding',
                             style: GoogleFonts.spaceGrotesk(
-                                color: Colors.white54, fontSize: 12,height: 1.4)),
+                                color: Colors.white54,
+                                fontSize: 12,
+                                height: 1.4)),
                       ],
                     ),
                   ),
@@ -241,8 +242,8 @@ class _GenerateScreenState extends State<GenerateScreen>
                     textCapitalization: TextCapitalization.words,
                     decoration: const InputDecoration(
                       hintText: 'e.g. John Doe',
-                      prefixIcon: Icon(Icons.person_outline,
-                          color: Color(0xFF7B61FF)),
+                      prefixIcon:
+                          Icon(Icons.person_outline, color: Color(0xFFF8C700)),
                     ),
                     validator: (v) {
                       if (v == null || v.trim().isEmpty) {
@@ -264,8 +265,8 @@ class _GenerateScreenState extends State<GenerateScreen>
                     keyboardType: TextInputType.phone,
                     decoration: const InputDecoration(
                       hintText: 'e.g. 98765 43210',
-                      prefixIcon: Icon(Icons.phone_outlined,
-                          color: Color(0xFF7B61FF)),
+                      prefixIcon:
+                          Icon(Icons.phone_outlined, color: Color(0xFFF8C700)),
                     ),
                     validator: (v) {
                       if (v == null || v.trim().isEmpty) {
@@ -286,21 +287,23 @@ class _GenerateScreenState extends State<GenerateScreen>
                   Container(
                     padding: const EdgeInsets.all(14),
                     decoration: BoxDecoration(
-                      color: const Color(0xFF00D4AA).withOpacity(0.06),
+                      color: const Color(0xFFF51424).withOpacity(0.06),
                       borderRadius: BorderRadius.circular(12),
                       border: Border.all(
-                          color: const Color(0xFF00D4AA).withOpacity(0.2)),
+                          color: const Color(0xFFF51424).withOpacity(0.2)),
                     ),
                     child: Row(
                       children: [
                         const Icon(Icons.lock_rounded,
-                            color: Color(0xFF00D4AA), size: 16),
+                            color: Color(0xFFF51424), size: 16),
                         const SizedBox(width: 10),
                         Expanded(
                           child: Text(
                             'QR data is encrypted. Only App can decode it.',
                             style: GoogleFonts.spaceGrotesk(
-                                color: Colors.white60, fontSize: 12, height: 1.4),
+                                color: Colors.white60,
+                                fontSize: 12,
+                                height: 1.4),
                           ),
                         ),
                       ],
@@ -328,8 +331,7 @@ class _GenerateScreenState extends State<GenerateScreen>
                               color: Colors.redAccent.withOpacity(0.1),
                               borderRadius: BorderRadius.circular(12),
                               border: Border.all(
-                                  color:
-                                      Colors.redAccent.withOpacity(0.3)),
+                                  color: Colors.redAccent.withOpacity(0.3)),
                             ),
                             child: const Icon(Icons.refresh_rounded,
                                 color: Colors.redAccent, size: 22),
@@ -413,7 +415,7 @@ class _QRResultCard extends StatelessWidget {
         border: Border.all(color: Colors.white.withOpacity(0.08)),
         boxShadow: [
           BoxShadow(
-            color: const Color(0xFF7B61FF).withOpacity(0.12),
+            color: const Color(0xFFF8C700).withOpacity(0.12),
             blurRadius: 30,
             offset: const Offset(0, 10),
           ),
@@ -427,7 +429,7 @@ class _QRResultCard extends StatelessWidget {
             padding: const EdgeInsets.symmetric(vertical: 12),
             decoration: BoxDecoration(
               gradient: const LinearGradient(
-                colors: [Color(0xFF7B61FF), Color(0xFF00D4AA)],
+                colors: [Color(0xFFF8C700), Color(0xFFF51424)],
               ),
               borderRadius:
                   const BorderRadius.vertical(top: Radius.circular(24)),
@@ -436,8 +438,7 @@ class _QRResultCard extends StatelessWidget {
               child: Row(
                 mainAxisSize: MainAxisSize.min,
                 children: [
-                  const Icon(Icons.lock_rounded,
-                      color: Colors.white, size: 14),
+                  const Icon(Icons.lock_rounded, color: Colors.white, size: 14),
                   const SizedBox(width: 6),
                   Text(
                     'AES-256 Encrypted QR Code',
@@ -477,8 +478,7 @@ class _QRResultCard extends StatelessWidget {
                         dataModuleShape: QrDataModuleShape.square,
                         color: Color(0xFF0A1118),
                       ),
-                      embeddedImage:
-                          const AssetImage('assets/app_logo.jpg'),
+                      embeddedImage: const AssetImage('assets/app_logo.jpg'),
                       embeddedImageStyle: const QrEmbeddedImageStyle(
                         size: Size(36, 36),
                       ),
@@ -509,13 +509,13 @@ class _QRResultCard extends StatelessWidget {
                           icon: Icons.person_rounded,
                           label: 'Name',
                           value: name,
-                          color: const Color(0xFF7B61FF)),
+                          color: const Color(0xFFF8C700)),
                       const Divider(color: Colors.white10, height: 20),
                       _InfoRow(
                           icon: Icons.phone_rounded,
                           label: 'Phone',
                           value: phone,
-                          color: const Color(0xFF00D4AA)),
+                          color: const Color(0xFFF51424)),
                     ],
                   ),
                 ),
@@ -528,7 +528,7 @@ class _QRResultCard extends StatelessWidget {
                       child: _ActionBtn(
                         icon: Icons.share_rounded,
                         label: 'Share',
-                        color: const Color(0xFF7B61FF),
+                        color: const Color(0xFFF8C700),
                         onTap: isSaving ? null : onShare,
                       ),
                     ),
@@ -537,7 +537,7 @@ class _QRResultCard extends StatelessWidget {
                       child: _ActionBtn(
                         icon: Icons.save_alt_rounded,
                         label: 'Save',
-                        color: const Color(0xFF00D4AA),
+                        color: const Color(0xFFF51424),
                         onTap: isSaving ? null : onSave,
                       ),
                     ),
@@ -553,8 +553,7 @@ class _QRResultCard extends StatelessWidget {
                         width: 14,
                         height: 14,
                         child: CircularProgressIndicator(
-                            strokeWidth: 2,
-                            color: Color(0xFF00D4AA)),
+                            strokeWidth: 2, color: Color(0xFFF51424)),
                       ),
                       const SizedBox(width: 8),
                       Text('Processing...',
@@ -569,23 +568,21 @@ class _QRResultCard extends StatelessWidget {
                 Container(
                   padding: const EdgeInsets.all(12),
                   decoration: BoxDecoration(
-                    color: const Color(0xFF00D4AA).withOpacity(0.07),
+                    color: const Color(0xFFF51424).withOpacity(0.07),
                     borderRadius: BorderRadius.circular(10),
                     border: Border.all(
-                        color: const Color(0xFF00D4AA).withOpacity(0.2)),
+                        color: const Color(0xFFF51424).withOpacity(0.2)),
                   ),
                   child: Row(
                     children: [
                       const Icon(Icons.info_outline_rounded,
-                          color: Color(0xFF00D4AA), size: 15),
+                          color: Color(0xFFF51424), size: 15),
                       const SizedBox(width: 8),
                       Expanded(
                         child: Text(
                           'Scan this QR with the Scan tab to auto-decrypt the contact details.',
                           style: GoogleFonts.spaceGrotesk(
-                              color: Colors.white60,
-                              fontSize: 12,
-                              height: 1.4),
+                              color: Colors.white60, fontSize: 12, height: 1.4),
                         ),
                       ),
                     ],
@@ -654,8 +651,7 @@ class _ActionBtn extends StatelessWidget {
         opacity: onTap == null ? 0.5 : 1.0,
         duration: const Duration(milliseconds: 200),
         child: Container(
-          padding:
-              const EdgeInsets.symmetric(vertical: 14),
+          padding: const EdgeInsets.symmetric(vertical: 14),
           decoration: BoxDecoration(
             color: color.withOpacity(0.12),
             borderRadius: BorderRadius.circular(14),
@@ -668,9 +664,7 @@ class _ActionBtn extends StatelessWidget {
               const SizedBox(width: 8),
               Text(label,
                   style: GoogleFonts.spaceGrotesk(
-                      color: color,
-                      fontWeight: FontWeight.w700,
-                      fontSize: 14)),
+                      color: color, fontWeight: FontWeight.w700, fontSize: 14)),
             ],
           ),
         ),

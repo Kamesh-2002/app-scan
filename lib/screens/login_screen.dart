@@ -206,7 +206,7 @@ class _LoginScreenState extends State<LoginScreen>
                           'QR Code Manager',
                           style: GoogleFonts.spaceGrotesk(
                             fontSize: 15,
-                            color: const Color(0xFF00D4AA),
+                            color: const Color(0xFFF51424),
                             fontWeight: FontWeight.w500,
                             letterSpacing: 1.5,
                           ),
@@ -256,7 +256,7 @@ class _LoginScreenState extends State<LoginScreen>
                                 decoration: const InputDecoration(
                                   labelText: 'Username',
                                   prefixIcon: Icon(Icons.person_outline,
-                                      color: Color(0xFF00D4AA)),
+                                      color: Color(0xFFF51424)),
                                 ),
                                 validator: (v) => v == null || v.isEmpty
                                     ? 'Enter username'
@@ -271,7 +271,7 @@ class _LoginScreenState extends State<LoginScreen>
                                 decoration: InputDecoration(
                                   labelText: 'Password',
                                   prefixIcon: const Icon(Icons.lock_outline,
-                                      color: Color(0xFF00D4AA)),
+                                      color: Color(0xFFF51424)),
                                   suffixIcon: IconButton(
                                     icon: Icon(
                                       _obscurePassword
@@ -368,13 +368,13 @@ class _LoginScreenState extends State<LoginScreen>
                                         : _authenticateWithBiometrics,
                                     icon: const Icon(
                                       Icons.fingerprint,
-                                      color: Color(0xFF00D4AA),
+                                      color: Color(0xFFF51424),
                                       size: 22,
                                     ),
                                     label: Text(
                                       'Sign in with Fingerprint',
                                       style: GoogleFonts.spaceGrotesk(
-                                        color: const Color(0xFF00D4AA),
+                                        color: const Color(0xFFF51424),
                                         fontWeight: FontWeight.w600,
                                         fontSize: 15,
                                       ),
@@ -383,8 +383,7 @@ class _LoginScreenState extends State<LoginScreen>
                                       padding: const EdgeInsets.symmetric(
                                           vertical: 14),
                                       side: const BorderSide(
-                                          color: Color(0xFF00D4AA),
-                                          width: 1.5),
+                                          color: Color(0xFFF51424), width: 1.5),
                                       shape: RoundedRectangleBorder(
                                         borderRadius: BorderRadius.circular(14),
                                       ),
@@ -400,23 +399,23 @@ class _LoginScreenState extends State<LoginScreen>
                           padding: const EdgeInsets.symmetric(
                               horizontal: 16, vertical: 10),
                           decoration: BoxDecoration(
-                            color: const Color(0xFF00D4AA).withOpacity(0.08),
+                            color: const Color(0xFFF51424).withOpacity(0.08),
                             borderRadius: BorderRadius.circular(10),
                             border: Border.all(
                                 color:
-                                    const Color(0xFF00D4AA).withOpacity(0.2)),
+                                    const Color(0xFFF51424).withOpacity(0.2)),
                           ),
                           child: Row(
                             mainAxisSize: MainAxisSize.min,
                             children: [
                               const Icon(Icons.info_outline,
-                                  color: Color(0xFF00D4AA), size: 16),
+                                  color: Color(0xFFF51424), size: 16),
                               const SizedBox(width: 8),
                               Text(
                                 'Default: admin / admin123',
                                 style: GoogleFonts.spaceGrotesk(
                                   fontSize: 13,
-                                  color: const Color(0xFF00D4AA),
+                                  color: const Color(0xFFF51424),
                                 ),
                               ),
                             ],

@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
+import 'package:local_auth/local_auth.dart';
 import '../services/auth_service.dart';
 import 'home_screen.dart';
 
@@ -22,6 +23,10 @@ class _LoginScreenState extends State<LoginScreen>
   late Animation<double> _fadeAnim;
   late Animation<Offset> _slideAnim;
 
+  // Biometric
+  final LocalAuthentication _localAuth = LocalAuthentication();
+  bool _biometricAvailable = false;
+
   @override
   void initState() {
     super.initState();
@@ -36,6 +41,65 @@ class _LoginScreenState extends State<LoginScreen>
     ).animate(CurvedAnimation(parent: _animCtrl, curve: Curves.easeOutCubic));
     _animCtrl.forward();
     _checkAutoLogin();
+    _checkBiometrics();
+  }
+
+  Future<void> _checkBiometrics() async {
+    try {
+      final canCheck = await _localAuth.canCheckBiometrics;
+      final isDeviceSupported = await _localAuth.isDeviceSupported();
+      if (mounted) {
+        setState(() => _biometricAvailable = canCheck && isDeviceSupported);
+      }
+    } catch (_) {
+      if (mounted) setState(() => _biometricAvailable = false);
+    }
+  }
+
+  Future<void> _authenticateWithBiometrics() async {
+    setState(() {
+      _isLoading = true;
+      _errorMessage = null;
+    });
+    try {
+      final authenticated = await _localAuth.authenticate(
+        localizedReason: 'Authenticate to sign in to App Scan',
+        options: const AuthenticationOptions(
+          biometricOnly: true,
+          stickyAuth: true,
+        ),
+      );
+      if (authenticated && mounted) {
+        // Use biometric login via AuthService (falls back to stored credentials)
+        final success = await AuthService.loginWithBiometrics();
+        if (mounted) {
+          setState(() => _isLoading = false);
+          if (success) {
+            Navigator.pushReplacement(
+              context,
+              PageRouteBuilder(
+                pageBuilder: (_, anim, __) => const HomeScreen(),
+                transitionsBuilder: (_, anim, __, child) =>
+                    FadeTransition(opacity: anim, child: child),
+                transitionDuration: const Duration(milliseconds: 500),
+              ),
+            );
+          } else {
+            setState(() =>
+                _errorMessage = 'Biometric login failed. Please use password.');
+          }
+        }
+      } else {
+        if (mounted) setState(() => _isLoading = false);
+      }
+    } catch (e) {
+      if (mounted) {
+        setState(() {
+          _isLoading = false;
+          _errorMessage = 'Biometric authentication error. Try again.';
+        });
+      }
+    }
   }
 
   Future<void> _checkAutoLogin() async {
@@ -268,6 +332,66 @@ class _LoginScreenState extends State<LoginScreen>
                                       : const Text('Sign In'),
                                 ),
                               ),
+
+                              // Fingerprint button — shown only when biometrics available
+                              if (_biometricAvailable) ...[
+                                const SizedBox(height: 16),
+                                Row(
+                                  children: [
+                                    Expanded(
+                                      child: Divider(
+                                          color: Colors.white.withOpacity(0.1)),
+                                    ),
+                                    Padding(
+                                      padding: const EdgeInsets.symmetric(
+                                          horizontal: 12),
+                                      child: Text(
+                                        'or',
+                                        style: GoogleFonts.spaceGrotesk(
+                                          color: Colors.white38,
+                                          fontSize: 13,
+                                        ),
+                                      ),
+                                    ),
+                                    Expanded(
+                                      child: Divider(
+                                          color: Colors.white.withOpacity(0.1)),
+                                    ),
+                                  ],
+                                ),
+                                const SizedBox(height: 16),
+                                SizedBox(
+                                  width: double.infinity,
+                                  child: OutlinedButton.icon(
+                                    onPressed: _isLoading
+                                        ? null
+                                        : _authenticateWithBiometrics,
+                                    icon: const Icon(
+                                      Icons.fingerprint,
+                                      color: Color(0xFF00D4AA),
+                                      size: 22,
+                                    ),
+                                    label: Text(
+                                      'Sign in with Fingerprint',
+                                      style: GoogleFonts.spaceGrotesk(
+                                        color: const Color(0xFF00D4AA),
+                                        fontWeight: FontWeight.w600,
+                                        fontSize: 15,
+                                      ),
+                                    ),
+                                    style: OutlinedButton.styleFrom(
+                                      padding: const EdgeInsets.symmetric(
+                                          vertical: 14),
+                                      side: const BorderSide(
+                                          color: Color(0xFF00D4AA),
+                                          width: 1.5),
+                                      shape: RoundedRectangleBorder(
+                                        borderRadius: BorderRadius.circular(14),
+                                      ),
+                                    ),
+                                  ),
+                                ),
+                              ],
                             ],
                           ),
                         ),

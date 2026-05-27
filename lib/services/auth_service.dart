@@ -53,4 +53,9 @@ class AuthService {
     await prefs.setString(_passwordKey, _hashPassword(newPassword));
     return true;
   }
+
+  static Future<bool> loginWithBiometrics() async {
+  // Return true if a valid saved session exists, or implement your own logic
+  return isLoggedIn();
+}
 }

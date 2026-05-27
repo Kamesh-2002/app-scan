@@ -4,7 +4,7 @@ import 'package:crypto/crypto.dart';
 import 'package:encrypt/encrypt.dart' as enc;
 
 class EncryptionService {
-  static const String _secretKey = 'AppScan@SecretKey2024!QREncrypt##';
+  static const String _secretKey = 'AppScan@SecretKey2026!QREncrypt##';
 
   static enc.Key _getKey() {
     final keyBytes = utf8.encode(_secretKey);

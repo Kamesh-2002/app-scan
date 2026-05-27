@@ -121,7 +121,16 @@ class _GenerateScreenState extends State<GenerateScreen>
       final byteData = await image.toByteData(format: ui.ImageByteFormat.png);
       final pngBytes = byteData!.buffer.asUint8List();
 
-      final dir = await getApplicationDocumentsDirectory();
+      final dir;
+      if (Platform.isAndroid) {
+      dir = Directory('/storage/emulated/0/Download');
+
+      if (!await dir.exists()) {
+        await dir.create(recursive: true);
+      }
+    } else {
+      dir = await getApplicationDocumentsDirectory();
+    }
       final fileName =
           'qr_${_nameCtrl.text.replaceAll(' ', '_')}_${DateTime.now().millisecondsSinceEpoch}.png';
       final file = File('${dir.path}/$fileName');

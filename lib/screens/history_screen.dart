@@ -363,7 +363,7 @@ class _HistoryScreenState extends State<HistoryScreen> {
                           const SizedBox(width: 12),
                           Expanded(
                             child: Text(
-                              DateFormat('dd MMM yy').format(scan.scannedAt),
+                              DateFormat('dd MMM yy HH:mm:ss').format(scan.scannedAt),
                               style: GoogleFonts.spaceGrotesk(
                                 color: Colors.white70,
                                 fontSize: 14,

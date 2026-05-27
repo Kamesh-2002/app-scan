@@ -41,8 +41,7 @@ class ExportServiceScanRecord {
         'Phone',
         'Raw Data',
         'Encrypted',
-        'Scan Count',
-        'Last Scanned'
+        'Scanned Timestamp'
       ],
     ];
 
@@ -54,7 +53,7 @@ class ExportServiceScanRecord {
         r.decryptedPhone ?? '',
         r.rawData,
         r.isEncrypted ? 'Yes' : 'No',
-        DateFormat('dd/MM/yyyy HH:mm').format(r.scannedAt),
+        DateFormat('dd/MM/yyyy HH:mm:ss').format(r.scannedAt),
       ]);
     }
 
@@ -93,8 +92,7 @@ class ExportServiceScanRecord {
       'Phone',
       'Raw Data',
       'Encrypted',
-      'Scan Count',
-      'Last Scanned'
+      'Scanned Timestamp'
     ];
 
     final headerStyle = CellStyle(
@@ -120,7 +118,7 @@ class ExportServiceScanRecord {
         r.decryptedPhone ?? '',
         r.rawData,
         r.isEncrypted ? 'Yes' : 'No',
-        DateFormat('dd/MM/yyyy HH:mm').format(r.scannedAt),
+        DateFormat('dd/MM/yyyy HH:mm:ss').format(r.scannedAt),
       ];
 
       final rowStyle = CellStyle(

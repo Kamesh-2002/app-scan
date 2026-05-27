@@ -480,7 +480,7 @@ class _HistoryScreenState extends State<HistoryScreen> {
                 ? const Center(
                     child: CircularProgressIndicator(color: Color(0xFF00D4AA)))
                 : _filtered.isEmpty
-                    ? _buildEmpty()
+                    ? _buildEmpty(onRefresh: _loadRecords)
                     : RefreshIndicator(
                         onRefresh: _loadRecords,
                         color: const Color(0xFF00D4AA),
@@ -528,37 +528,58 @@ class _HistoryScreenState extends State<HistoryScreen> {
     );
   }
 
-  Widget _buildEmpty() {
-    final hasSearch = _searchCtrl.text.isNotEmpty;
-    return Center(
-      child: Column(
-        mainAxisAlignment: MainAxisAlignment.center,
-        children: [
-          Icon(
-            hasSearch ? Icons.search_off_rounded : Icons.history_rounded,
-            size: 64,
-            color: Colors.white24,
+  Widget _buildEmpty({required Future<void> Function() onRefresh}) {
+  final hasSearch = _searchCtrl.text.isNotEmpty;
+
+  return RefreshIndicator(
+    onRefresh: onRefresh,
+    color: Colors.white,
+    backgroundColor: Colors.black,
+    child: ListView(
+      physics: const AlwaysScrollableScrollPhysics(),
+      children: [
+        SizedBox(
+          height: MediaQuery.of(context).size.height * 0.7,
+          child: Center(
+            child: Column(
+              mainAxisAlignment: MainAxisAlignment.center,
+              children: [
+                Icon(
+                  hasSearch
+                      ? Icons.search_off_rounded
+                      : Icons.history_rounded,
+                  size: 64,
+                  color: Colors.white24,
+                ),
+                const SizedBox(height: 16),
+                Text(
+                  hasSearch
+                      ? 'No matching records'
+                      : 'No scans yet',
+                  style: GoogleFonts.spaceGrotesk(
+                    color: Colors.white54,
+                    fontSize: 18,
+                    fontWeight: FontWeight.w600,
+                  ),
+                ),
+                const SizedBox(height: 8),
+                Text(
+                  hasSearch
+                      ? 'Try a different search term'
+                      : 'Scan a QR code to get started',
+                  style: GoogleFonts.spaceGrotesk(
+                    color: Colors.white38,
+                    fontSize: 14,
+                  ),
+                ),
+              ],
+            ),
           ),
-          const SizedBox(height: 16),
-          Text(
-            hasSearch ? 'No matching records' : 'No scans yet',
-            style: GoogleFonts.spaceGrotesk(
-                color: Colors.white54,
-                fontSize: 18,
-                fontWeight: FontWeight.w600),
-          ),
-          const SizedBox(height: 8),
-          Text(
-            hasSearch
-                ? 'Try a different search term'
-                : 'Scan a QR code to get started',
-            style:
-                GoogleFonts.spaceGrotesk(color: Colors.white38, fontSize: 14),
-          ),
-        ],
-      ),
-    );
-  }
+        ),
+      ],
+    ),
+  );
+}
 }
 
 // ─── Sub-widgets ──────────────────────────────────────────────────────────────

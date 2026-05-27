@@ -63,9 +63,9 @@ class _LoginScreenState extends State<LoginScreen>
     });
     try {
       final authenticated = await _localAuth.authenticate(
-        localizedReason: 'Authenticate to sign in to App Scan',
+        localizedReason: 'Authenticate to sign in to the App',
         options: const AuthenticationOptions(
-          biometricOnly: true,
+          biometricOnly: false,
           stickyAuth: true,
         ),
       );

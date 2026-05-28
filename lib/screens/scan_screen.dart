@@ -2,6 +2,7 @@ import 'package:app_scan/services/auth_service.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:google_fonts/google_fonts.dart';
+import 'package:local_auth/local_auth.dart';
 import 'package:mobile_scanner/mobile_scanner.dart';
 import '../models/scan_record.dart';
 import '../services/database_service.dart';
@@ -450,22 +451,23 @@ class _ScanResultSheet extends StatelessWidget {
   final ScanRecord record;
   final VoidCallback stopScanner;
   final BuildContext context;
-  const _ScanResultSheet({required this.record, required this.stopScanner, required this.context});
+  const _ScanResultSheet(
+      {required this.record, required this.stopScanner, required this.context});
 
   Future<void> resetUser() async {
     final confirmed = await showDialog<bool>(
       context: context,
-      builder: (context) => AlertDialog(
+      builder: (_context) => AlertDialog(
         title: const Text('Confirm Reset'),
         content: const Text(
             'Are you sure you want to reset? This will delete the scan record.'),
         actions: [
           TextButton(
-            onPressed: () => Navigator.of(context).pop(false),
+            onPressed: () => Navigator.of(_context).pop(false),
             child: const Text('Cancel'),
           ),
           TextButton(
-            onPressed: () => Navigator.of(context).pop(true),
+            onPressed: () => Navigator.of(_context).pop(true),
             style: TextButton.styleFrom(
                 backgroundColor: Colors.red, foregroundColor: Colors.white),
             child: const Text('Reset'),
@@ -604,7 +606,7 @@ class _ScanResultSheet extends StatelessWidget {
                   ),
                   const SizedBox(width: 12.0),
                   TextButton(
-                    onPressed: () => resetUser,
+                    onPressed: resetUser,
                     style: TextButton.styleFrom(
                       foregroundColor:
                           Theme.of(context).colorScheme.onErrorContainer,
@@ -683,6 +685,45 @@ class _EditMaxCountSheetState extends State<_EditMaxCountSheet> {
   final _formKey = GlobalKey<FormState>();
   String? _errorMessage;
   bool _obscurePassword = true;
+  final LocalAuthentication _localAuth = LocalAuthentication();
+
+  Future<void> _loginbiometric() async {
+    setState(() {
+      _errorMessage = "";
+    });
+    try {
+      final authenticated = await _localAuth.authenticate(
+        localizedReason: 'Authenticate to sign in to the App',
+        options: const AuthenticationOptions(
+          biometricOnly: false,
+          stickyAuth: true,
+        ),
+      );
+      if (authenticated && mounted) {
+        // Use biometric login via AuthService (falls back to stored credentials)
+        final success = await AuthService.loginWithBiometrics();
+        if (mounted) {
+          if (success) {
+            final bool _datasucess = await AuthService.editMaxCount(
+                count: int.parse(_maxCountCtrl.text));
+            if (_datasucess) {
+              Navigator.pop(widget.context, true);
+            }
+          } else {
+            setState(() => _errorMessage =
+                'Biometric login failed.\n Please use password.');
+          }
+        }
+      } else {}
+    } catch (e) {
+      if (mounted) {
+        setState(() {
+          _errorMessage = 'Error:\n ${e.toString()}'; // <-- change this line
+        });
+      }
+    }
+  }
+
   Future<void> _login() async {
     if (!_formKey.currentState!.validate()) return;
 
@@ -795,7 +836,7 @@ class _EditMaxCountSheetState extends State<_EditMaxCountSheet> {
                 style: ButtonStyle(
                   backgroundColor: WidgetStateProperty.all(Colors.teal),
                 ),
-                child: Text('Sign in',
+                child: Text('Approve with password',
                     style: GoogleFonts.spaceGrotesk(color: Colors.white70)),
               ),
               const SizedBox(
@@ -805,8 +846,8 @@ class _EditMaxCountSheetState extends State<_EditMaxCountSheet> {
                 style: ButtonStyle(
                   backgroundColor: WidgetStateProperty.all(Colors.teal),
                 ),
-                onPressed: () => Navigator.pop(widget.context, false),
-                label: Text('Sign in with biometric',
+                onPressed: () => _loginbiometric,
+                label: Text('Approve with biometric',
                     style: GoogleFonts.spaceGrotesk(color: Colors.white70)),
                 icon: const Icon(Icons.fingerprint, color: Colors.white70),
               ),

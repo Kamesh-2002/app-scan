@@ -1,3 +1,4 @@
+import 'package:app_scan/services/auth_service.dart';
 import 'package:sqflite/sqflite.dart';
 import 'package:path/path.dart';
 import '../models/scan_record.dart';
@@ -41,6 +42,7 @@ class DatabaseService {
   Future<ScanRecord> insertOrUpdateScan(ScanRecord record) async {
     final db = await database;
     int newCount;
+    int maxScanCount = await AuthService.getMaxCount();
 
     // Check if the same QR data already exists
     final existing = await db.query(
@@ -52,8 +54,23 @@ class DatabaseService {
     if (existing.isNotEmpty) {
       final existingRecord = ScanRecord.fromMap(existing.first);
       newCount = existing.length + 1;
-    }
-    else{
+      final scansPreviousRecors = await getScansByNameAndPhone(
+          existingRecord.decryptedName!, existingRecord.decryptedPhone!);
+      final previousRecordLength = scansPreviousRecors.length;
+      if (previousRecordLength > maxScanCount) {
+        return ScanRecord(
+          id: existingRecord.id,
+          rawData: existingRecord.rawData,
+          decryptedName: existingRecord.decryptedName,
+          decryptedPhone: existingRecord.decryptedPhone,
+          isEncrypted: existingRecord.isEncrypted,
+          scannedAt: existingRecord.scannedAt,
+          numScanCount: scansPreviousRecors.length,
+          error: true,
+          errorMsg: "Already ${previousRecordLength} scans occured",
+        );
+      }
+    } else {
       newCount = 1;
     }
     //   final newCount = existingRecord.scanCount + 1;

@@ -59,72 +59,72 @@ class _HistoryScreenState extends State<HistoryScreen> {
     });
   }
 
-  Future<void> _deleteRecord(ScanRecord record) async {
-    final confirmed = await showDialog<bool>(
-      context: context,
-      builder: (ctx) => AlertDialog(
-        backgroundColor: const Color(0xFF1A2535),
-        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(20)),
-        title: Text('Delete Record',
-            style: GoogleFonts.spaceGrotesk(
-                color: Colors.white, fontWeight: FontWeight.w700)),
-        content: Text('Remove "${record.displayTitle}" from history?',
-            style: GoogleFonts.spaceGrotesk(color: Colors.white70)),
-        actions: [
-          TextButton(
-            onPressed: () => Navigator.pop(ctx, false),
-            child:
-                const Text('Cancel', style: TextStyle(color: Colors.white54)),
-          ),
-          ElevatedButton(
-            onPressed: () => Navigator.pop(ctx, true),
-            style: ElevatedButton.styleFrom(
-                backgroundColor: Colors.redAccent,
-                foregroundColor: Colors.white),
-            child: const Text('Delete'),
-          ),
-        ],
-      ),
-    );
-    if (confirmed == true && record.id != null) {
-      await DatabaseService.instance.deleteScan(record.id!);
-      _loadRecords();
-    }
-  }
+  // Future<void> _deleteRecord(ScanRecord record) async {
+  //   final confirmed = await showDialog<bool>(
+  //     context: context,
+  //     builder: (ctx) => AlertDialog(
+  //       backgroundColor: const Color(0xFF1A2535),
+  //       shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(20)),
+  //       title: Text('Delete Record',
+  //           style: GoogleFonts.spaceGrotesk(
+  //               color: Colors.white, fontWeight: FontWeight.w700)),
+  //       content: Text('Remove "${record.displayTitle}" from history?',
+  //           style: GoogleFonts.spaceGrotesk(color: Colors.white70)),
+  //       actions: [
+  //         TextButton(
+  //           onPressed: () => Navigator.pop(ctx, false),
+  //           child:
+  //               const Text('Cancel', style: TextStyle(color: Colors.white54)),
+  //         ),
+  //         ElevatedButton(
+  //           onPressed: () => Navigator.pop(ctx, true),
+  //           style: ElevatedButton.styleFrom(
+  //               backgroundColor: Colors.redAccent,
+  //               foregroundColor: Colors.white),
+  //           child: const Text('Delete'),
+  //         ),
+  //       ],
+  //     ),
+  //   );
+  //   if (confirmed == true && record.id != null) {
+  //     await DatabaseService.instance.deleteScan(record.id!);
+  //     _loadRecords();
+  //   }
+  // }
 
-  Future<void> _clearAll() async {
-    final confirmed = await showDialog<bool>(
-      context: context,
-      builder: (ctx) => AlertDialog(
-        backgroundColor: const Color(0xFF1A2535),
-        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(20)),
-        title: Text('Clear All History',
-            style: GoogleFonts.spaceGrotesk(
-                color: Colors.white, fontWeight: FontWeight.w700)),
-        content: Text(
-            'This will permanently delete all ${_records.length} scan records. This cannot be undone.',
-            style: GoogleFonts.spaceGrotesk(color: Colors.white70)),
-        actions: [
-          TextButton(
-            onPressed: () => Navigator.pop(ctx, false),
-            child:
-                const Text('Cancel', style: TextStyle(color: Colors.white54)),
-          ),
-          ElevatedButton(
-            onPressed: () => Navigator.pop(ctx, true),
-            style: ElevatedButton.styleFrom(
-                backgroundColor: Colors.redAccent,
-                foregroundColor: Colors.white),
-            child: const Text('Clear All'),
-          ),
-        ],
-      ),
-    );
-    if (confirmed == true) {
-      await DatabaseService.instance.clearAllScans();
-      _loadRecords();
-    }
-  }
+  // Future<void> _clearAll() async {
+  //   final confirmed = await showDialog<bool>(
+  //     context: context,
+  //     builder: (ctx) => AlertDialog(
+  //       backgroundColor: const Color(0xFF1A2535),
+  //       shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(20)),
+  //       title: Text('Clear All History',
+  //           style: GoogleFonts.spaceGrotesk(
+  //               color: Colors.white, fontWeight: FontWeight.w700)),
+  //       content: Text(
+  //           'This will permanently delete all ${_records.length} scan records. This cannot be undone.',
+  //           style: GoogleFonts.spaceGrotesk(color: Colors.white70)),
+  //       actions: [
+  //         TextButton(
+  //           onPressed: () => Navigator.pop(ctx, false),
+  //           child:
+  //               const Text('Cancel', style: TextStyle(color: Colors.white54)),
+  //         ),
+  //         ElevatedButton(
+  //           onPressed: () => Navigator.pop(ctx, true),
+  //           style: ElevatedButton.styleFrom(
+  //               backgroundColor: Colors.redAccent,
+  //               foregroundColor: Colors.white),
+  //           child: const Text('Clear All'),
+  //         ),
+  //       ],
+  //     ),
+  //   );
+  //   if (confirmed == true) {
+  //     await DatabaseService.instance.clearAllScans();
+  //     _loadRecords();
+  //   }
+  // }
 
   void _showExportSheet(List<Map<String, Object?>>? sheetMapRecords,
       List<ScanRecord>? sheetScanRecords, bool isScan) {

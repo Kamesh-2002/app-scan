@@ -6,6 +6,8 @@ class ScanRecord {
   final bool isEncrypted;
   final DateTime scannedAt;
   final int? numScanCount;
+  final bool error;
+  final String errorMsg;
 
   ScanRecord({
     this.id,
@@ -15,6 +17,8 @@ class ScanRecord {
     required this.isEncrypted,
     required this.scannedAt,
     this.numScanCount,
+    this.error = false,
+    this.errorMsg = "",
   });
 
   Map<String, dynamic> toMap() {

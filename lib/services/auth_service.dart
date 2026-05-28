@@ -58,7 +58,23 @@ class AuthService {
 
   static Future<bool> loginWithBiometrics() async {
     // Return true if a valid saved session exists, or implement your own logic
-    final bool result = await login(defaultUsername,defaultPassword);
+    final bool result = await login(defaultUsername, defaultPassword);
     return result;
+  }
+
+  static Future<int> getMaxCount() async {
+    final prefs = await SharedPreferences.getInstance();
+    final count = await prefs.getInt('max_count') ?? -1;
+    if (count < 0){
+      await prefs.setInt('max_count', 200);
+      return 200;
+    } else {
+      return count;
+    }
+  }
+
+  static Future<bool> editMaxCount({required int count}) async {
+    final prefs = await SharedPreferences.getInstance();
+    return await prefs.setInt('max_count', count);
   }
 }

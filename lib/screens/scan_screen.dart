@@ -1,3 +1,4 @@
+import 'package:app_scan/services/auth_service.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:google_fonts/google_fonts.dart';
@@ -19,6 +20,23 @@ class _ScanScreenState extends State<ScanScreen> {
   bool _isScannerActive = false;
   ScanRecord? _lastScanned;
   bool _torchOn = false;
+  int maxCountValue = 200;
+
+  @override
+  void initState() {
+    super.initState();
+    _loadMaxCount();
+  }
+
+  Future<void> _loadMaxCount() async {
+    final value = await AuthService.getMaxCount();
+
+    if (!mounted) return;
+
+    setState(() {
+      maxCountValue = value;
+    });
+  }
 
   void _startScanner() {
     setState(() {
@@ -71,6 +89,33 @@ class _ScanScreenState extends State<ScanScreen> {
     }
   }
 
+  void _editMaxCount() async {
+    final bool? success = await showModalBottomSheet<bool>(
+      context: context,
+      builder: (ctx) => _EditMaxCountSheet(
+        context: ctx,
+      ),
+    );
+
+    if (success != null && success) {
+      await _loadMaxCount();
+      // success snackbar
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(
+          content: Text('Max scan count updated successfully'),
+          duration: Duration(seconds: 2),
+        ),
+      );
+    } else {
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(
+          content: Text('Max Scan count not updated'),
+          duration: Duration(seconds: 2),
+        ),
+      );
+    }
+  }
+
   void _showResultSheet(ScanRecord record) {
     showModalBottomSheet(
       context: context,
@@ -79,6 +124,7 @@ class _ScanScreenState extends State<ScanScreen> {
         borderRadius: BorderRadius.vertical(top: Radius.circular(24)),
       ),
       builder: (ctx) => _ScanResultSheet(
+        context: ctx,
         record: record,
         stopScanner: _stopScanner,
       ),
@@ -143,7 +189,38 @@ class _ScanScreenState extends State<ScanScreen> {
                 height: 1.6,
               ),
             ),
-            const SizedBox(height: 40),
+            const SizedBox(height: 32),
+            Row(
+              mainAxisAlignment: MainAxisAlignment.center,
+              children: [
+                Text(
+                  "Maximum Scan count:",
+                  style: GoogleFonts.spaceGrotesk(
+                    fontSize: 15,
+                    color: Colors.white54,
+                    height: 1.6,
+                  ),
+                ),
+                const SizedBox(
+                  width: 5,
+                ),
+                Text(
+                  maxCountValue.toString(),
+                  style: GoogleFonts.spaceGrotesk(
+                    fontSize: 15,
+                    color: Colors.white54,
+                    height: 1.6,
+                  ),
+                ),
+                const SizedBox(
+                  width: 5,
+                ),
+                IconButton(
+                    onPressed: _editMaxCount,
+                    icon: Icon(Icons.edit, color: Colors.teal, size: 15)),
+              ],
+            ),
+            const SizedBox(height: 10),
             SizedBox(
               width: 200,
               child: ElevatedButton.icon(
@@ -372,7 +449,42 @@ class _ScanOverlayPainter extends CustomPainter {
 class _ScanResultSheet extends StatelessWidget {
   final ScanRecord record;
   final VoidCallback stopScanner;
-  const _ScanResultSheet({required this.record, required this.stopScanner});
+  final BuildContext context;
+  const _ScanResultSheet({required this.record, required this.stopScanner, required this.context});
+
+  Future<void> resetUser() async {
+    final confirmed = await showDialog<bool>(
+      context: context,
+      builder: (context) => AlertDialog(
+        title: const Text('Confirm Reset'),
+        content: const Text(
+            'Are you sure you want to reset? This will delete the scan record.'),
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.of(context).pop(false),
+            child: const Text('Cancel'),
+          ),
+          TextButton(
+            onPressed: () => Navigator.of(context).pop(true),
+            style: TextButton.styleFrom(
+                backgroundColor: Colors.red, foregroundColor: Colors.white),
+            child: const Text('Reset'),
+          ),
+        ],
+      ),
+    );
+
+    if (confirmed == true && record.id != null) {
+      await DatabaseService.instance.deleteScan(record.id!);
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(
+          content: Text('Scan record reset successfully'),
+          duration: Duration(seconds: 2),
+        ),
+      );
+      Navigator.of(context).pop();
+    }
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -462,6 +574,51 @@ class _ScanResultSheet extends StatelessWidget {
           //         : record.rawData,
           //     icon: Icons.data_object_rounded),
           const SizedBox(height: 20),
+          if (record.error) ...[
+            // Displays an error message in a styled container with a reset button.
+            Container(
+              margin: const EdgeInsets.only(bottom: 16.0),
+              padding: const EdgeInsets.all(16.0),
+              decoration: BoxDecoration(
+                color: Theme.of(context)
+                    .colorScheme
+                    .errorContainer
+                    .withOpacity(0.3),
+                borderRadius: BorderRadius.circular(12.0),
+              ),
+              child: Row(
+                children: [
+                  Icon(
+                    Icons.error_outline,
+                    color: Theme.of(context).colorScheme.onErrorContainer,
+                  ),
+                  const SizedBox(width: 12.0),
+                  Expanded(
+                    child: Text(
+                      record.errorMsg,
+                      style: TextStyle(
+                        color: Theme.of(context).colorScheme.onErrorContainer,
+                        fontWeight: FontWeight.w600,
+                      ),
+                    ),
+                  ),
+                  const SizedBox(width: 12.0),
+                  TextButton(
+                    onPressed: () => resetUser,
+                    style: TextButton.styleFrom(
+                      foregroundColor:
+                          Theme.of(context).colorScheme.onErrorContainer,
+                      backgroundColor:
+                          Theme.of(context).colorScheme.errorContainer,
+                    ),
+                    child: const Text('RESET'),
+                  ),
+                ],
+              ),
+            ),
+
+            const SizedBox(height: 20),
+          ],
           SizedBox(
             width: double.infinity,
             child: ElevatedButton(
@@ -505,6 +662,180 @@ class _InfoRow extends StatelessWidget {
                       color: Colors.white, fontWeight: FontWeight.w600)),
             ],
           ),
+        ],
+      ),
+    );
+  }
+}
+
+class _EditMaxCountSheet extends StatefulWidget {
+  final BuildContext context;
+  const _EditMaxCountSheet({required this.context});
+
+  @override
+  State<_EditMaxCountSheet> createState() => _EditMaxCountSheetState();
+}
+
+class _EditMaxCountSheetState extends State<_EditMaxCountSheet> {
+  final _usernameCtrl = TextEditingController();
+  final _passwordCtrl = TextEditingController();
+  final _maxCountCtrl = TextEditingController();
+  final _formKey = GlobalKey<FormState>();
+  String? _errorMessage;
+  bool _obscurePassword = true;
+  Future<void> _login() async {
+    if (!_formKey.currentState!.validate()) return;
+
+    final success = await AuthService.login(
+      _usernameCtrl.text.trim(),
+      _passwordCtrl.text,
+    );
+    if (mounted && context.mounted) {
+      if (success) {
+        final bool _datasucess = await AuthService.editMaxCount(
+            count: int.parse(_maxCountCtrl.text));
+        if (_datasucess) {
+          Navigator.pop(widget.context, true);
+        } else {
+          setState(() => _errorMessage = 'Invalid username or password');
+        }
+      } else {
+        setState(() => _errorMessage = 'Invalid username or password');
+      }
+    }
+  }
+
+  // dispose the controllers
+  @override
+  void dispose() {
+    _usernameCtrl.dispose();
+    _passwordCtrl.dispose();
+    _maxCountCtrl.dispose();
+    super.dispose();
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    return Form(
+      key: _formKey,
+      child: Column(
+        children: [
+          const SizedBox(height: 10),
+          Text('Edit the number of max scan',
+              style: GoogleFonts.spaceGrotesk(color: Colors.white70)),
+          const SizedBox(height: 28),
+          TextFormField(
+            controller: _maxCountCtrl,
+            keyboardType: TextInputType.number,
+            style: const TextStyle(color: Colors.white),
+            decoration: const InputDecoration(
+              labelText: 'Edit max scan',
+              prefixIcon: Icon(Icons.edit, color: Color(0xFF00D4AA)),
+            ),
+            validator: (v) {
+              if (v == null || v.isEmpty) {
+                return 'Enter max scan';
+              } else if (int.tryParse(v) == null) {
+                return 'Invalid max scan';
+              } else if (int.parse(v) <= 0) {
+                return 'Max scan must be greater than 0';
+              }
+              return null;
+            },
+            textInputAction: TextInputAction.next,
+          ),
+          const SizedBox(height: 16),
+          TextFormField(
+            controller: _usernameCtrl,
+            style: const TextStyle(color: Colors.white),
+            decoration: const InputDecoration(
+              labelText: 'Username',
+              prefixIcon: Icon(Icons.person_outline, color: Color(0xFF00D4AA)),
+            ),
+            validator: (v) => v == null || v.isEmpty ? 'Enter username' : null,
+            textInputAction: TextInputAction.next,
+          ),
+          const SizedBox(height: 16),
+          TextFormField(
+            controller: _passwordCtrl,
+            style: const TextStyle(color: Colors.white),
+            obscureText: _obscurePassword,
+            decoration: InputDecoration(
+              labelText: 'Password',
+              prefixIcon:
+                  const Icon(Icons.lock_outline, color: Color(0xFF00D4AA)),
+              suffixIcon: IconButton(
+                icon: Icon(
+                  _obscurePassword
+                      ? Icons.visibility_off_outlined
+                      : Icons.visibility_outlined,
+                  color: Colors.white54,
+                ),
+                onPressed: () =>
+                    setState(() => _obscurePassword = !_obscurePassword),
+              ),
+            ),
+            validator: (v) => v == null || v.isEmpty ? 'Enter password' : null,
+            textInputAction: TextInputAction.done,
+            onFieldSubmitted: (_) => _login(),
+          ),
+          const SizedBox(height: 24),
+          Row(
+            children: [
+              TextButton(
+                onPressed: () => Navigator.pop(widget.context, false),
+                child: const Text('Cancel',
+                    style: TextStyle(color: Colors.white54)),
+              ),
+              const SizedBox(
+                width: 5,
+              ),
+              TextButton(
+                onPressed: () => _login(),
+                style: ButtonStyle(
+                  backgroundColor: WidgetStateProperty.all(Colors.teal),
+                ),
+                child: Text('Sign in',
+                    style: GoogleFonts.spaceGrotesk(color: Colors.white70)),
+              ),
+              const SizedBox(
+                width: 5,
+              ),
+              TextButton.icon(
+                style: ButtonStyle(
+                  backgroundColor: WidgetStateProperty.all(Colors.teal),
+                ),
+                onPressed: () => Navigator.pop(widget.context, false),
+                label: Text('Sign in with biometric',
+                    style: GoogleFonts.spaceGrotesk(color: Colors.white70)),
+                icon: const Icon(Icons.fingerprint, color: Colors.white70),
+              ),
+            ],
+          ),
+          // error message
+          if (_errorMessage != null) ...[
+            const SizedBox(height: 14),
+            Container(
+              padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 10),
+              decoration: BoxDecoration(
+                color: Colors.red.withOpacity(0.12),
+                borderRadius: BorderRadius.circular(10),
+                border: Border.all(color: Colors.red.withOpacity(0.3)),
+              ),
+              child: Row(
+                children: [
+                  const Icon(Icons.error_outline,
+                      color: Colors.redAccent, size: 18),
+                  const SizedBox(width: 8),
+                  Text(
+                    _errorMessage!,
+                    style:
+                        const TextStyle(color: Colors.redAccent, fontSize: 13),
+                  ),
+                ],
+              ),
+            ),
+          ],
         ],
       ),
     );

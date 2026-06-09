@@ -90,11 +90,26 @@ class _ScanScreenState extends State<ScanScreen> {
     }
   }
 
+  void resetLastScanned() {
+    setState(() {
+      _lastScanned = null;
+    });
+  }
+
   void _editMaxCount() async {
     final bool? success = await showModalBottomSheet<bool>(
       context: context,
-      builder: (ctx) => _EditMaxCountSheet(
-        context: ctx,
+      isScrollControlled: true,
+      builder: (ctx) => FractionallySizedBox(
+        heightFactor: 0.95,
+        child: Padding(
+          padding: EdgeInsets.only(
+            bottom: MediaQuery.of(context).viewInsets.bottom,
+          ),
+          child: _EditMaxCountSheet(
+            context: ctx,
+          ),
+        ),
       ),
     );
 
@@ -125,10 +140,10 @@ class _ScanScreenState extends State<ScanScreen> {
         borderRadius: BorderRadius.vertical(top: Radius.circular(24)),
       ),
       builder: (ctx) => _ScanResultSheet(
-        context: ctx,
-        record: record,
-        stopScanner: _stopScanner,
-      ),
+          context: ctx,
+          record: record,
+          stopScanner: _stopScanner,
+          resetLastScanned: resetLastScanned),
     );
   }
 
@@ -450,9 +465,13 @@ class _ScanOverlayPainter extends CustomPainter {
 class _ScanResultSheet extends StatelessWidget {
   final ScanRecord record;
   final VoidCallback stopScanner;
+  final VoidCallback resetLastScanned;
   final BuildContext context;
   const _ScanResultSheet(
-      {required this.record, required this.stopScanner, required this.context});
+      {required this.record,
+      required this.stopScanner,
+      required this.context,
+      required this.resetLastScanned});
 
   Future<void> resetUser() async {
     final confirmed = await showDialog<bool>(
@@ -476,15 +495,19 @@ class _ScanResultSheet extends StatelessWidget {
       ),
     );
 
-    if (confirmed == true && record.id != null) {
-      await DatabaseService.instance.deleteScan(record.id!);
+    if (confirmed == true &&
+        record.decryptedName != null &&
+        record.decryptedPhone != null) {
+      await DatabaseService.instance
+          .deleteAllScan(record.decryptedName!, record.decryptedPhone!);
+      resetLastScanned();
       ScaffoldMessenger.of(context).showSnackBar(
         const SnackBar(
           content: Text('Scan record reset successfully'),
           duration: Duration(seconds: 2),
         ),
       );
-      Navigator.of(context).pop();
+      Navigator.of(context).pop("resetted");
     }
   }
 
@@ -688,9 +711,12 @@ class _EditMaxCountSheetState extends State<_EditMaxCountSheet> {
   final LocalAuthentication _localAuth = LocalAuthentication();
 
   Future<void> _loginbiometric() async {
-    setState(() {
-      _errorMessage = "";
-    });
+    if (_maxCountCtrl.text.isEmpty || int.parse(_maxCountCtrl.text) < 0) {
+      setState(() {
+        _errorMessage = "Invalid Input";
+      });
+      return;
+    }
     try {
       final authenticated = await _localAuth.authenticate(
         localizedReason: 'Authenticate to sign in to the App',
@@ -757,127 +783,136 @@ class _EditMaxCountSheetState extends State<_EditMaxCountSheet> {
 
   @override
   Widget build(BuildContext context) {
-    return Form(
-      key: _formKey,
-      child: Column(
-        children: [
-          const SizedBox(height: 10),
-          Text('Edit the number of max scan',
-              style: GoogleFonts.spaceGrotesk(color: Colors.white70)),
-          const SizedBox(height: 28),
-          TextFormField(
-            controller: _maxCountCtrl,
-            keyboardType: TextInputType.number,
-            style: const TextStyle(color: Colors.white),
-            decoration: const InputDecoration(
-              labelText: 'Edit max scan',
-              prefixIcon: Icon(Icons.edit, color: Color(0xFF00D4AA)),
-            ),
-            validator: (v) {
-              if (v == null || v.isEmpty) {
-                return 'Enter max scan';
-              } else if (int.tryParse(v) == null) {
-                return 'Invalid max scan';
-              } else if (int.parse(v) <= 0) {
-                return 'Max scan must be greater than 0';
-              }
-              return null;
-            },
-            textInputAction: TextInputAction.next,
-          ),
-          const SizedBox(height: 16),
-          TextFormField(
-            controller: _usernameCtrl,
-            style: const TextStyle(color: Colors.white),
-            decoration: const InputDecoration(
-              labelText: 'Username',
-              prefixIcon: Icon(Icons.person_outline, color: Color(0xFF00D4AA)),
-            ),
-            validator: (v) => v == null || v.isEmpty ? 'Enter username' : null,
-            textInputAction: TextInputAction.next,
-          ),
-          const SizedBox(height: 16),
-          TextFormField(
-            controller: _passwordCtrl,
-            style: const TextStyle(color: Colors.white),
-            obscureText: _obscurePassword,
-            decoration: InputDecoration(
-              labelText: 'Password',
-              prefixIcon:
-                  const Icon(Icons.lock_outline, color: Color(0xFF00D4AA)),
-              suffixIcon: IconButton(
-                icon: Icon(
-                  _obscurePassword
-                      ? Icons.visibility_off_outlined
-                      : Icons.visibility_outlined,
-                  color: Colors.white54,
-                ),
-                onPressed: () =>
-                    setState(() => _obscurePassword = !_obscurePassword),
-              ),
-            ),
-            validator: (v) => v == null || v.isEmpty ? 'Enter password' : null,
-            textInputAction: TextInputAction.done,
-            onFieldSubmitted: (_) => _login(),
-          ),
-          const SizedBox(height: 24),
-          Row(
+    return SingleChildScrollView(
+      child: Padding(
+        padding: const EdgeInsets.all(8.0),
+        child: Form(
+          key: _formKey,
+          child: Column(
             children: [
+              const SizedBox(height: 10),
+              Text('Edit the number of max scan',
+                  style: GoogleFonts.spaceGrotesk(color: Colors.white70)),
+              const SizedBox(height: 28),
+              TextFormField(
+                controller: _maxCountCtrl,
+                keyboardType: TextInputType.number,
+                style: const TextStyle(color: Colors.white),
+                decoration: const InputDecoration(
+                  labelText: 'Edit max scan',
+                  prefixIcon: Icon(Icons.edit, color: Color(0xFF00D4AA)),
+                ),
+                validator: (v) {
+                  if (v == null || v.isEmpty) {
+                    return 'Enter max scan';
+                  } else if (int.tryParse(v) == null) {
+                    return 'Invalid max scan';
+                  } else if (int.parse(v) <= 0) {
+                    return 'Max scan must be greater than 0';
+                  }
+                  return null;
+                },
+                textInputAction: TextInputAction.next,
+              ),
+              const SizedBox(height: 16),
+              TextFormField(
+                controller: _usernameCtrl,
+                style: const TextStyle(color: Colors.white),
+                decoration: const InputDecoration(
+                  labelText: 'Username',
+                  prefixIcon:
+                      Icon(Icons.person_outline, color: Color(0xFF00D4AA)),
+                ),
+                validator: (v) =>
+                    v == null || v.isEmpty ? 'Enter username' : null,
+                textInputAction: TextInputAction.next,
+              ),
+              const SizedBox(height: 16),
+              TextFormField(
+                controller: _passwordCtrl,
+                style: const TextStyle(color: Colors.white),
+                obscureText: _obscurePassword,
+                decoration: InputDecoration(
+                  labelText: 'Password',
+                  prefixIcon:
+                      const Icon(Icons.lock_outline, color: Color(0xFF00D4AA)),
+                  suffixIcon: IconButton(
+                    icon: Icon(
+                      _obscurePassword
+                          ? Icons.visibility_off_outlined
+                          : Icons.visibility_outlined,
+                      color: Colors.white54,
+                    ),
+                    onPressed: () =>
+                        setState(() => _obscurePassword = !_obscurePassword),
+                  ),
+                ),
+                validator: (v) =>
+                    v == null || v.isEmpty ? 'Enter password' : null,
+                textInputAction: TextInputAction.done,
+                onFieldSubmitted: (_) => _login(),
+              ),
+              const SizedBox(height: 24),
               TextButton(
                 onPressed: () => Navigator.pop(widget.context, false),
                 child: const Text('Cancel',
-                    style: TextStyle(color: Colors.white54)),
+                    style: TextStyle(color: Colors.white70)),
               ),
-              const SizedBox(
-                width: 5,
-              ),
-              TextButton(
-                onPressed: () => _login(),
-                style: ButtonStyle(
-                  backgroundColor: WidgetStateProperty.all(Colors.teal),
-                ),
-                child: Text('Approve with password',
-                    style: GoogleFonts.spaceGrotesk(color: Colors.white70)),
-              ),
-              const SizedBox(
-                width: 5,
-              ),
-              TextButton.icon(
-                style: ButtonStyle(
-                  backgroundColor: WidgetStateProperty.all(Colors.teal),
-                ),
-                onPressed: () => _loginbiometric,
-                label: Text('Approve with biometric',
-                    style: GoogleFonts.spaceGrotesk(color: Colors.white70)),
-                icon: const Icon(Icons.fingerprint, color: Colors.white70),
-              ),
-            ],
-          ),
-          // error message
-          if (_errorMessage != null) ...[
-            const SizedBox(height: 14),
-            Container(
-              padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 10),
-              decoration: BoxDecoration(
-                color: Colors.red.withOpacity(0.12),
-                borderRadius: BorderRadius.circular(10),
-                border: Border.all(color: Colors.red.withOpacity(0.3)),
-              ),
-              child: Row(
+              Row(
                 children: [
-                  const Icon(Icons.error_outline,
-                      color: Colors.redAccent, size: 18),
-                  const SizedBox(width: 8),
-                  Text(
-                    _errorMessage!,
-                    style:
-                        const TextStyle(color: Colors.redAccent, fontSize: 13),
+                  const SizedBox(
+                    width: 5,
+                  ),
+                  TextButton(
+                    onPressed: () => _login(),
+                    style: ButtonStyle(
+                      backgroundColor: WidgetStateProperty.all(Colors.teal),
+                    ),
+                    child: Text('Approve with password',
+                        style: GoogleFonts.spaceGrotesk(color: Colors.white70)),
+                  ),
+                  const SizedBox(
+                    width: 5,
+                  ),
+                  TextButton.icon(
+                    style: ButtonStyle(
+                      backgroundColor: WidgetStateProperty.all(Colors.teal),
+                    ),
+                    onPressed: _loginbiometric,
+                    label: Text('Approve with biometric',
+                        style: GoogleFonts.spaceGrotesk(color: Colors.white70)),
+                    icon: const Icon(Icons.fingerprint, color: Colors.white70),
                   ),
                 ],
               ),
-            ),
-          ],
-        ],
+              // error message
+              if (_errorMessage != null) ...[
+                const SizedBox(height: 14),
+                Container(
+                  padding:
+                      const EdgeInsets.symmetric(horizontal: 14, vertical: 10),
+                  decoration: BoxDecoration(
+                    color: Colors.red.withOpacity(0.12),
+                    borderRadius: BorderRadius.circular(10),
+                    border: Border.all(color: Colors.red.withOpacity(0.3)),
+                  ),
+                  child: Row(
+                    children: [
+                      const Icon(Icons.error_outline,
+                          color: Colors.redAccent, size: 18),
+                      const SizedBox(width: 8),
+                      Text(
+                        _errorMessage!,
+                        style: const TextStyle(
+                            color: Colors.redAccent, fontSize: 13),
+                      ),
+                    ],
+                  ),
+                ),
+              ],
+            ],
+          ),
+        ),
       ),
     );
   }

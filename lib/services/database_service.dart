@@ -57,7 +57,7 @@ class DatabaseService {
       final scansPreviousRecors = await getScansByNameAndPhone(
           existingRecord.decryptedName!, existingRecord.decryptedPhone!);
       final previousRecordLength = scansPreviousRecors.length;
-      if (previousRecordLength > maxScanCount) {
+      if ((previousRecordLength + 1) > maxScanCount) {
         return ScanRecord(
           id: existingRecord.id,
           rawData: existingRecord.rawData,
@@ -138,6 +138,10 @@ class DatabaseService {
   Future<void> deleteScan(int id) async {
     final db = await database;
     await db.delete('scan_records', where: 'id = ?', whereArgs: [id]);
+  }
+  Future<void> deleteAllScan(String decryptedName, String decryptedPhone) async {
+    final db = await database;
+    await db.delete('scan_records', where: 'decryptedName = ? AND decryptedPhone = ?', whereArgs: [decryptedName, decryptedPhone]);
   }
 
   Future<void> clearAllScans() async {

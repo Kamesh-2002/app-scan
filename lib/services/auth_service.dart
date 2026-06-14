@@ -62,19 +62,17 @@ class AuthService {
     return result;
   }
 
-  static Future<int> getMaxCount() async {
+  static Future<List<int>> getMaxCount() async {
+    int maxCount, maxCountPerDay;
     final prefs = await SharedPreferences.getInstance();
-    final count = await prefs.getInt('max_count') ?? -1;
-    if (count < 0){
-      await prefs.setInt('max_count', 200);
-      return 200;
-    } else {
-      return count;
-    }
+    maxCount = prefs.getInt('max_count') ?? 200;
+    maxCountPerDay = prefs.getInt('max_count') ?? 5;
+    return [maxCount, maxCountPerDay];
   }
 
-  static Future<bool> editMaxCount({required int count}) async {
+  static Future<bool> editMaxCount({required int count, required int count_per_day}) async {
     final prefs = await SharedPreferences.getInstance();
-    return await prefs.setInt('max_count', count);
+    return (await prefs.setInt('max_count', count)) &&
+        (await prefs.setInt('max_count_per_day', count_per_day));
   }
 }

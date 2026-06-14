@@ -42,7 +42,8 @@ class DatabaseService {
   Future<ScanRecord> insertOrUpdateScan(ScanRecord record) async {
     final db = await database;
     int newCount;
-    int maxScanCount = await AuthService.getMaxCount();
+    int maxScanCount = (await AuthService.getMaxCount())[0];
+    int maxScanCountPerDay = (await AuthService.getMaxCount())[1];
 
     // Check if the same QR data already exists
     final existing = await db.query(
@@ -57,7 +58,11 @@ class DatabaseService {
       final scansPreviousRecors = await getScansByNameAndPhone(
           existingRecord.decryptedName!, existingRecord.decryptedPhone!);
       final previousRecordLength = scansPreviousRecors.length;
-      if ((previousRecordLength + 1) > maxScanCount) {
+      final todayRecordCount = await getTodayRecordCount(
+          name: existingRecord.decryptedName!,
+          phone: existingRecord.decryptedPhone!);
+      if ((previousRecordLength + 1) > maxScanCount ||
+          (todayRecordCount + 1) > maxScanCountPerDay) {
         return ScanRecord(
           id: existingRecord.id,
           rawData: existingRecord.rawData,
@@ -67,7 +72,10 @@ class DatabaseService {
           scannedAt: existingRecord.scannedAt,
           numScanCount: scansPreviousRecors.length,
           error: true,
-          errorMsg: "Already ${previousRecordLength} scans occured",
+          errorCode: (previousRecordLength + 1) > maxScanCount
+              ? 0
+              : 1,
+          errorMsg: "Already ${(previousRecordLength + 1) > maxScanCount? previousRecordLength: todayRecordCount} scans occured",
         );
       }
     } else {
@@ -125,6 +133,42 @@ class DatabaseService {
     );
     return maps.map((map) => ScanRecord.fromMap(map)).toList();
   }
+
+  Future<int> getTodayRecordCount({
+  required String name,
+  required String phone,
+}) async {
+  final db = await database;
+
+  final now = DateTime.now();
+
+  final startOfDay = DateTime(
+    now.year,
+    now.month,
+    now.day,
+  );
+
+  final endOfDay = startOfDay.add(const Duration(days: 1));
+
+  final result = await db.rawQuery(
+    '''
+    SELECT COUNT(*) AS count
+    FROM scan_records
+    WHERE decryptedName = ?
+      AND decryptedPhone = ?
+      AND scannedAt >= ?
+      AND scannedAt < ?
+    ''',
+    [
+      name,
+      phone,
+      startOfDay.toIso8601String(),
+      endOfDay.toIso8601String(),
+    ],
+  );
+
+  return Sqflite.firstIntValue(result) ?? 0;
+}
 
   Future<List<ScanRecord>> getAllScans() async {
     final db = await database;

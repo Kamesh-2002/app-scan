@@ -7,6 +7,7 @@ class ScanRecord {
   final DateTime scannedAt;
   final int? numScanCount;
   final bool error;
+  final int errorCode;
   final String errorMsg;
 
   ScanRecord({
@@ -18,6 +19,7 @@ class ScanRecord {
     required this.scannedAt,
     this.numScanCount,
     this.error = false,
+    this.errorCode = 0,
     this.errorMsg = "",
   });
 

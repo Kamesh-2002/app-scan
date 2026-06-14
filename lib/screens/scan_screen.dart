@@ -22,6 +22,7 @@ class _ScanScreenState extends State<ScanScreen> {
   ScanRecord? _lastScanned;
   bool _torchOn = false;
   int maxCountValue = 200;
+  int maxPerDayCountValue = 5;
 
   @override
   void initState() {
@@ -35,7 +36,8 @@ class _ScanScreenState extends State<ScanScreen> {
     if (!mounted) return;
 
     setState(() {
-      maxCountValue = value;
+      maxCountValue = value[0];
+      maxPerDayCountValue = value[1];
     });
   }
 
@@ -204,6 +206,19 @@ class _ScanScreenState extends State<ScanScreen> {
                 color: Colors.white54,
                 height: 1.6,
               ),
+            ),
+            const SizedBox(height: 32),
+            Row(
+              children: [
+                Text(
+                  "Maximum Scan count/day:",
+                  style: GoogleFonts.spaceGrotesk(
+                    fontSize: 15,
+                    color: Colors.white54,
+                    height: 1.6,
+                  ),
+                ),
+              ],
             ),
             const SizedBox(height: 32),
             Row(
@@ -627,17 +642,19 @@ class _ScanResultSheet extends StatelessWidget {
                       ),
                     ),
                   ),
-                  const SizedBox(width: 12.0),
-                  TextButton(
-                    onPressed: resetUser,
-                    style: TextButton.styleFrom(
-                      foregroundColor:
-                          Theme.of(context).colorScheme.onErrorContainer,
-                      backgroundColor:
-                          Theme.of(context).colorScheme.errorContainer,
+                  if (record.errorCode == 0) ...[
+                    const SizedBox(width: 12.0),
+                    TextButton(
+                      onPressed: resetUser,
+                      style: TextButton.styleFrom(
+                        foregroundColor:
+                            Theme.of(context).colorScheme.onErrorContainer,
+                        backgroundColor:
+                            Theme.of(context).colorScheme.errorContainer,
+                      ),
+                      child: const Text('RESET'),
                     ),
-                    child: const Text('RESET'),
-                  ),
+                  ]
                 ],
               ),
             ),
@@ -705,6 +722,7 @@ class _EditMaxCountSheetState extends State<_EditMaxCountSheet> {
   final _usernameCtrl = TextEditingController();
   final _passwordCtrl = TextEditingController();
   final _maxCountCtrl = TextEditingController();
+  final _maxCountCtrlPerDay = TextEditingController();
   final _formKey = GlobalKey<FormState>();
   String? _errorMessage;
   bool _obscurePassword = true;
@@ -712,10 +730,13 @@ class _EditMaxCountSheetState extends State<_EditMaxCountSheet> {
 
   Future<void> _loginbiometric() async {
     if (_maxCountCtrl.text.isEmpty || int.parse(_maxCountCtrl.text) < 0) {
-      setState(() {
-        _errorMessage = "Invalid Input";
-      });
-      return;
+      if (_maxCountCtrlPerDay.text.isEmpty ||
+          int.parse(_maxCountCtrlPerDay.text) < 0) {
+        setState(() {
+          _errorMessage = "Invalid Input";
+        });
+        return;
+      }
     }
     try {
       final authenticated = await _localAuth.authenticate(
@@ -731,7 +752,8 @@ class _EditMaxCountSheetState extends State<_EditMaxCountSheet> {
         if (mounted) {
           if (success) {
             final bool _datasucess = await AuthService.editMaxCount(
-                count: int.parse(_maxCountCtrl.text));
+                count: int.parse(_maxCountCtrl.text),
+                count_per_day: int.parse(_maxCountCtrlPerDay.text));
             if (_datasucess) {
               Navigator.pop(widget.context, true);
             }
@@ -760,7 +782,8 @@ class _EditMaxCountSheetState extends State<_EditMaxCountSheet> {
     if (mounted && context.mounted) {
       if (success) {
         final bool _datasucess = await AuthService.editMaxCount(
-            count: int.parse(_maxCountCtrl.text));
+            count: int.parse(_maxCountCtrl.text),
+            count_per_day: int.parse(_maxCountCtrlPerDay.text));
         if (_datasucess) {
           Navigator.pop(widget.context, true);
         } else {
@@ -800,6 +823,27 @@ class _EditMaxCountSheetState extends State<_EditMaxCountSheet> {
                 style: const TextStyle(color: Colors.white),
                 decoration: const InputDecoration(
                   labelText: 'Edit max scan',
+                  prefixIcon: Icon(Icons.edit, color: Color(0xFF00D4AA)),
+                ),
+                validator: (v) {
+                  if (v == null || v.isEmpty) {
+                    return 'Enter max scan';
+                  } else if (int.tryParse(v) == null) {
+                    return 'Invalid max scan';
+                  } else if (int.parse(v) <= 0) {
+                    return 'Max scan must be greater than 0';
+                  }
+                  return null;
+                },
+                textInputAction: TextInputAction.next,
+              ),
+              const SizedBox(height: 16),
+              TextFormField(
+                controller: _maxCountCtrlPerDay,
+                keyboardType: TextInputType.number,
+                style: const TextStyle(color: Colors.white),
+                decoration: const InputDecoration(
+                  labelText: 'Edit max scan /day/user',
                   prefixIcon: Icon(Icons.edit, color: Color(0xFF00D4AA)),
                 ),
                 validator: (v) {

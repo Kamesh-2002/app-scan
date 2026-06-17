@@ -110,6 +110,8 @@ class _ScanScreenState extends State<ScanScreen> {
           ),
           child: _EditMaxCountSheet(
             context: ctx,
+            maxCount: maxCountValue,
+            maxCountPerDay: maxPerDayCountValue,
           ),
         ),
       ),
@@ -209,9 +211,21 @@ class _ScanScreenState extends State<ScanScreen> {
             ),
             const SizedBox(height: 32),
             Row(
+              mainAxisAlignment: MainAxisAlignment.center,
               children: [
                 Text(
                   "Maximum Scan count/day:",
+                  style: GoogleFonts.spaceGrotesk(
+                    fontSize: 15,
+                    color: Colors.white54,
+                    height: 1.6,
+                  ),
+                ),
+                const SizedBox(
+                  width: 5,
+                ),
+                Text(
+                  maxPerDayCountValue.toString(),
                   style: GoogleFonts.spaceGrotesk(
                     fontSize: 15,
                     color: Colors.white54,
@@ -712,7 +726,9 @@ class _InfoRow extends StatelessWidget {
 
 class _EditMaxCountSheet extends StatefulWidget {
   final BuildContext context;
-  const _EditMaxCountSheet({required this.context});
+  final int maxCount;
+  final int maxCountPerDay;
+  const _EditMaxCountSheet({required this.context, required this.maxCount, required this.maxCountPerDay});
 
   @override
   State<_EditMaxCountSheet> createState() => _EditMaxCountSheetState();
@@ -728,12 +744,21 @@ class _EditMaxCountSheetState extends State<_EditMaxCountSheet> {
   bool _obscurePassword = true;
   final LocalAuthentication _localAuth = LocalAuthentication();
 
+  // init state
+  @override
+  void initState() {
+    super.initState();
+    _maxCountCtrl.text = widget.maxCount.toString();
+    _maxCountCtrlPerDay.text = widget.maxCountPerDay.toString();
+  }
+
+  // authenticate with biometric
   Future<void> _loginbiometric() async {
     if (_maxCountCtrl.text.isEmpty || int.parse(_maxCountCtrl.text) < 0) {
       if (_maxCountCtrlPerDay.text.isEmpty ||
           int.parse(_maxCountCtrlPerDay.text) < 0) {
         setState(() {
-          _errorMessage = "Invalid Input";
+          _errorMessage = "Invalid Input\n\n Enter Both Inputs correctly.";
         });
         return;
       }

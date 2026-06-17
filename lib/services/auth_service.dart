@@ -66,7 +66,7 @@ class AuthService {
     int maxCount, maxCountPerDay;
     final prefs = await SharedPreferences.getInstance();
     maxCount = prefs.getInt('max_count') ?? 200;
-    maxCountPerDay = prefs.getInt('max_count') ?? 5;
+    maxCountPerDay = prefs.getInt('max_count_per_day') ?? 5;
     return [maxCount, maxCountPerDay];
   }
 
